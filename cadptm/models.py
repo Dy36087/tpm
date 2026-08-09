@@ -1,21 +1,32 @@
 from django.db import models, transaction
 import uuid
 from datetime import datetime
-import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
+
+try:
+    import qrcode
+except ImportError:  # pragma: no cover
+    qrcode = None
 
 
 class SequenciaPatrimonio(models.Model):
     ano = models.IntegerField(unique=True)
     ultimo_numero = models.IntegerField(default=0)
-    
+
+    class Meta:
+        app_label = "cadptm"
+
+
 class Auditoria(models.Model):
     usuario = models.ForeignKey("auth.User", on_delete=models.CASCADE)
     acao = models.CharField(max_length=50)
     tabela = models.CharField(max_length=50)
     registro_id = models.IntegerField()
     data_hora = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "cadptm"
 
 
 class Patrimonio(models.Model):
@@ -66,6 +77,9 @@ class Patrimonio(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True)
 
     def gerar_qrcode(self):
+        if qrcode is None:
+            return
+
         data = f"{self.patrimonio}|{self.material}"
 
         img = qrcode.make(data)
@@ -103,6 +117,9 @@ class Patrimonio(models.Model):
         if not self.qr_code:
             self.gerar_qrcode()
             super().save(update_fields=["qr_code"])
+
+    class Meta:
+        app_label = "cadptm"
 
     def __str__(self):
         return self.patrimonio

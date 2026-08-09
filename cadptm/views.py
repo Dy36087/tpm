@@ -16,10 +16,14 @@ from .forms import PatrimonioForm
 from io import BytesIO
 from django.core.files.base import ContentFile
 import pandas as pd
-import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
 import uuid
+
+try:
+    import qrcode  # noqa: F401
+except ImportError:  # pragma: no cover
+    qrcode = None
 from django.utils import timezone
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image

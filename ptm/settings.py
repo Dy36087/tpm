@@ -36,7 +36,7 @@ SECRET_KEY = os.environ.get(
 )
 
 IS_HEROKU = bool(os.environ.get("DYNO") or os.environ.get("HEROKU_APP_NAME"))
-DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
 
 if IS_HEROKU:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ptm.settings")
@@ -80,7 +80,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 if IS_HEROKU:
     ALLOWED_HOSTS = ["*"]
-    CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com", "https://*.app.github.dev"]
+    CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com", "https://*.app.github.dev", "https://*.github.dev"]
 else:
     ALLOWED_HOSTS = ["*"]
     CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
@@ -203,7 +203,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Use WhiteNoise to serve static files in production when installed
 if WHITENOISE_INSTALLED:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
 
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
