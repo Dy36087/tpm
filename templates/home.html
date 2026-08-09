@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PTM | Gestão Integrada</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: linear-gradient(135deg, #0f172a, #1d4ed8);
+        color: #fff;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 24px;
+        text-align: center;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.12);
+        padding: 40px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      }
+      h1 {
+        font-size: 2.3rem;
+        margin-bottom: 12px;
+      }
+      p {
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+      .btns {
+        margin-top: 24px;
+      }
+      .btn {
+        display: inline-block;
+        margin: 8px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .btn-primary {
+        background: #fff;
+        color: #0f172a;
+      }
+      .btn-secondary {
+        background: transparent;
+        color: #fff;
+        border: 1px solid #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>{{ hero_title }}</h1>
+        <p>{{ subtitle }}</p>
+        <p>Esta é a aplicação PTM do repositório atual, com a home pública configurada para o deploy Heroku.</p>
+        <div class="btns">
+          <a class="btn btn-primary" href="/admin/">Acessar painel</a>
+          <a class="btn btn-secondary" href="/login/">Entrar</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
