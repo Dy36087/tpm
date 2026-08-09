@@ -35,30 +35,61 @@ SECRET_KEY = os.environ.get(
     "django-insecure-*hlj6ov+d+6u9h2y*(gk^jz^cput0px27ub9mc_o+am$+s-gjn",
 )
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# Set `DJANGO_DEBUG` env var to 'False' in production.
-DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+IS_HEROKU = bool(os.environ.get("DYNO") or os.environ.get("HEROKU_APP_NAME"))
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+
+if IS_HEROKU:
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ptm.settings")
 
 # Hosts
-DEFAULT_ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".herokuapp.com"]
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
-    if host.strip()
+DEFAULT_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", ".herokuapp.com", ".app.github.dev"]
+
+
+def get_allowed_hosts():
+    hosts = [
+        host.strip()
+        for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    ]
+
+    if "*" in hosts:
+        return ["*"]
+
+    if IS_HEROKU:
+        return ["*"]
+
+    hosts.extend(DEFAULT_ALLOWED_HOSTS)
+
+    heroku_app_name = os.environ.get("HEROKU_APP_NAME")
+    if heroku_app_name:
+        hosts.extend([heroku_app_name, f"{heroku_app_name}.herokuapp.com"])
+
+    runtime_host = os.environ.get("APP_DOMAIN") or os.environ.get("HOSTNAME")
+    if runtime_host:
+        hosts.append(runtime_host)
+
+    return list(dict.fromkeys(hosts))
+
+
+ALLOWED_HOSTS = get_allowed_hosts()
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
 ]
 
-if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = DEFAULT_ALLOWED_HOSTS
+if IS_HEROKU:
+    ALLOWED_HOSTS = ["*"]
+    CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com", "https://*.app.github.dev"]
+else:
+    ALLOWED_HOSTS = ["*"]
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    CSRF_TRUSTED_ORIGINS = [
-        origin.strip()
-        for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
-        if origin.strip()
-    ]
 
 
 # Application definition
@@ -70,10 +101,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "cadptm.apps.CadptmConfig",
     "principal.apps.PrincipalConfig",
-    "pontoele.apps.PontoeleConfig",
+    "cadptm.apps.CadptmConfig",
     "cadferramentas.apps.CadferramentasConfig",
+    "pontoele.apps.PontoeleConfig",
 ]
 
 MIDDLEWARE = [
@@ -86,7 +117,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Inserir WhiteNoise no middleware quando disponível (apenas para produção)
 if WHITENOISE_INSTALLED:
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
