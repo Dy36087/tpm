@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+    <meta charset="UTF-8">
+    <title>PTM - PESQUISA PATRIMONIO</title>
+    <link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">   
+    <link rel="stylesheet" href="/static/principal/css/principal.css"/>   
+
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f6f9;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: auto;
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            h2 {
+                text-align: center;
+                color: #333;
+                margin-bottom: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            input,
+            select,
+            textarea {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
+
+            textarea {
+                resize: vertical;
+            }
+
+            .row {
+                display: flex;
+                gap: 15px;
+            }
+
+            .row .form-group {
+                flex: 1;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px;
+                background-color: #0078D4;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background-color: #005ea6;
+            }
+
+            .hero {
+                margin-top: 20px;
+                display: flex;
+                gap: 10px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+            }
+
+            thead {
+                background: #0078D4;
+                color: white;
+            }
+
+            th,
+            td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            .logo-topo {
+                text-align: left;
+                margin-bottom: 15px;
+            }
+
+            .logo-topo img {
+                height: 70px;
+            }
+
+            .painel-filtros {
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+
+            .contador {
+                margin-bottom: 15px;
+                font-size: 16px;
+            }
+
+            .filtros {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .filtros input {
+                width: 180px;
+            }
+
+            .filtros select {
+                width: 150px;
+            }
+
+            .botao {
+                width: auto;
+                min-width: 120px;
+                padding: 10px;
+            }
+
+            .grafico-card {
+                background: white;
+                border: 1px solid #ddd;
+                padding: 20px;
+                margin-top: 25px;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0,0,0,.1);
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="logo-topo">
+                    <img src="/media/logo.png" alt="Logo">
+            </div>
+
+            <h2 style="margin-bottom:20px;">📦 Gestão de Patrimônio</h2>
+
+                <div id="reader" style="width:300px;"></div>
+
+                    <div>
+                        <strong id="contadorSelecionados">0 selecionado(s)</strong>
+                    </div>
+
+                        <div style="display:flex;gap:10px;">
+
+                            <input type="text" id="busca" placeholder="Buscar patrimônio ou material">
+                            
+                            <input type="text" id="filtro_material" placeholder="Material">
+
+                            <input type="text" id="filtro_localizacao" placeholder="Localização">
+
+                            
+                            <select id="filtro_tipo">
+                                    <option value="">Tipo</option>
+                                    <option value="proprio">Próprio</option>
+                                    <option value="terceiro">Terceiro</option>
+                            </select>
+
+
+                            <select id="status">
+                                <option value="todos">Todos</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="baixa">Baixa</option>
+                            </select>
+
+                            <button class="botao" onclick="carregarItens()">🔍 Buscar</button>
+                            <button class="botao" onclick="abrirScanner()">📷 QR Code</button>
+
+                            <button class="botao" onclick="selecionarTodosVisiveis()">
+                                ✅ Selecionar Todos
+                            </button>
+
+                            <button class="botao" onclick="limparSelecao()">
+                                ❌ Limpar
+                            </button>
+
+                            <select id="formato_exportacao">
+                                <option value="excel">📊 Excel</option>
+                                <option value="pdf">📄 PDF</option>
+                                <option value="excel_etiqueta">🏷️ Etiqueta</option>
+                            </select>
+
+                            <button class="botao" onclick="exportar()">
+                                📤 Exportar
+                            </button>
+
+                        </div>
+                </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Controle</th>
+                        <th>Patrimônio</th>
+                        <th>Tipo</th>
+                        <th>Material</th>
+                        <th>Localização</th>
+                        <th>Status</th>
+                        <th>QR</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-itens">
+                    <tr>
+                        <td colspan="9">Carregando...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="paginacao">
+                <button class="botao" onclick="paginaAnterior()">Anterior</button>
+                <span id="pagina-info"></span>
+                <button class="botao" onclick="proximaPagina()">Próxima</button>
+            </div>          
+            
+            <div class="grafico-card">
+                <h3>Status dos Patrimônios</h3>
+
+                <canvas id="graficoStatus"></canvas>
+
+                <div style="width:100%;
+                    height:400px;
+                    margin-top:20px;
+                    background:white;
+                    padding:20px;
+                    border-radius:10px;">
+                    <canvas id="graficoStatus"></canvas>
+                </div>
+
+            </div>
+
+            <section class="hero">
+
+                <a href="http://127.0.0.1:8000/ptmdsa/" class="btn-secondary">
+                    <button class="botao" onclick="location.href='http://127.0.0.1:8000/ptmdsa/'">PAGINA PRINCIPAL</button>
+                </a>
+
+                <a href="http://127.0.0.1:8000/ptmdsa/cadptm/" class="btn-secondary">
+                    <button class="botao" onclick="location.href='http://127.0.0.1:8000/ptmdsa/cadptm/'">CADASTRAR PATRIMONIO</button>
+                </a>
+            </section>
+            <script>
+                function carregarGrafico() {
+
+                    fetch("/ptmdsa/cadptm/dashboard/")
+                        .then(res => res.json())
+                        .then(data => {
+
+                            const ctx = document.getElementById("graficoStatus");
+
+                            new Chart(ctx, {
+                                type: "bar",
+                                data: {
+                                    labels: ["Ativo", "Baixado"],
+                                    datasets: [{
+                                        label: "Quantidade",
+                                        data: [
+                                            data.ativo || 0,
+                                            data.baixado || 0
+                                        ],
+                                        backgroundColor: [
+                                            "#28a745",
+                                            "#dc3545"
+                                        ]
+                                    }]
+                                }
+                            });
+
+                        })
+                        .catch(error => {
+                            console.error("Erro gráfico:", error);
+                        });
+                }
+            </script>
+            <script>
+                let paginaAtual = 1;
+
+                function proximaPagina() {
+                    paginaAtual++;
+                    carregarItens(paginaAtual);
+                }
+
+                function paginaAnterior() {
+                    if (paginaAtual > 1) {
+                        paginaAtual--;
+                        carregarItens(paginaAtual);
+                    }
+                }
+
+                function atualizarPaginacao(pagina, total) {
+                    document.getElementById("pagina-info").innerText =
+                        `Página ${pagina} de ${total}`;
+                }
+            </script>
+            <script>
+                function getSelecionados() {
+                    const selecionados = [];
+
+                    document.querySelectorAll(".item-select:checked").forEach(el => {
+                    selecionados.push(el.value);
+                });
+
+                return selecionados;
+            }
+            </script>
+            <script>
+                function limparSelecao() {
+                    document.querySelectorAll(".item-select").forEach(cb => {
+                    cb.checked = false;
+                });
+                atualizarContador();
+            }
+            </script>
+            <script>
+                function selecionarTodosVisiveis() {
+                    document.querySelectorAll(".item-select").forEach(cb => {
+                        cb.checked = true;
+                    });
+                }
+            </script>
+            <script>
+                function atualizarContador() {
+                    const total = document.querySelectorAll(".item-select:checked").length;
+                    document.getElementById("contadorSelecionados").innerText = total + " selecionado(s)";
+            }
+            </script>
+            <script>
+                function selecionarTodos(master) {
+                    document.querySelectorAll(".item-select").forEach(cb => {
+                        cb.checked = master.checked;
+                });
+            }
+            </script>
+            <script>
+                // A função antiga com 7 parâmetros foi removida para evitar conflito.
+            </script>
+            <script>    
+            function exportar() {
+
+                const selecionados = getSelecionados();
+                const formato = document.getElementById("formato_exportacao").value;
+
+                // ✅ Se não selecionar nada → exporta tudo filtrado
+                if (selecionados.length === 0) {
+
+                    if (!confirm("Nenhum item selecionado. Exportar TODOS os resultados?")) return;
+
+                    const busca = document.getElementById("busca").value || "todos";
+                    const status = document.getElementById("status").value || "todos";
+
+                    window.open(`/ptmdsa/cadptm/exportar_filtro/${formato}/${busca}/${status}/`, "_blank");
+                    return;
+                }
+
+                // ✅ Se selecionou → exporta só os selecionados
+                if (!confirm(`Exportar ${selecionados.length} item(ns)?`)) return;
+
+                const ids = selecionados.join(",");
+
+                window.open(`/ptmdsa/cadptm/exportar/${formato}/${ids}/`, "_blank");
+            }
+            </script>
+            <script>
+                function abrirScanner() {
+                    const leitor = new Html5Qrcode("reader");
+
+                    leitor.start(
+                        { facingMode: "environment" },
+                        {
+                            fps: 10,
+                            qrbox: 250
+                        },
+                        (decodedText) => {
+                            console.log("QR lido:", decodedText);
+
+                            // Formato: patrimonio|material
+                            const partes = decodedText.split("|");
+
+                            const patrimonio = partes[0];
+                            const material = partes[1];
+
+                            document.getElementById("busca").value = patrimonio;
+
+                            leitor.stop();
+
+                            carregarItens(); // 🔥 faz a busca automática
+                        },
+                        (errorMessage) => {
+                            // ignorar erros de leitura
+                        }
+                );
+            }
+            </script>
+            <script>
+                function carregarItens(pagina = 1) {
+                    const buscaInput = document.getElementById("busca").value;
+                    const statusInput = document.getElementById("status").value;
+                    const materialInput = document.getElementById("filtro_material").value;
+                    const localizacaoInput = document.getElementById("filtro_localizacao").value;
+                    const tipoInput = document.getElementById("filtro_tipo").value;
+
+                    const busca = buscaInput ? encodeURIComponent(buscaInput) : "todos";
+                    const status = statusInput ? encodeURIComponent(statusInput) : "todos";
+                    const material = materialInput ? encodeURIComponent(materialInput) : "todos";
+                    const localizacao = localizacaoInput ? encodeURIComponent(localizacaoInput) : "todos";
+                    const tipo = tipoInput ? encodeURIComponent(tipoInput) : "todos";
+
+                    const url = `/ptmdsa/cadptm/pesquisar/listar_itens/${busca}/${status}/?material=${material}&localizacao=${localizacao}&tipo=${tipo}&pagina=${pagina}`;
+
+                    paginaAtual = pagina;
+                    console.log("URL enviada:", url);
+
+                    fetch(url)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Erro HTTP: " + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log("Resposta:", data);
+
+                            const tabela = document.getElementById("tabela-itens");
+                            tabela.innerHTML = "";
+
+                            if (!data.itens || data.itens.length === 0) {
+                                tabela.innerHTML = `
+                                    <tr>
+                                        <td colspan="9">Nenhum resultado encontrado</td>
+                                    </tr>`;
+                                atualizarPaginacao(0, 0);
+                                return;
+                            }
+
+                            atualizarPaginacao(data.pagina, data.total_paginas);
+
+                            data.itens.forEach(item => {
+                                const tr = document.createElement("tr");                    
+                                tr.innerHTML = `                        
+                                    <td><input type="checkbox" class="item-select" value="${item.id}" onchange="atualizarContador()"></td>
+                                    <td>${item.controle || ""}</td>
+                                    <td>${item.patrimonio || ""}</td>
+                                    <td>${item.tipo || ""}</td>
+                                    <td>${item.material || ""}</td>
+                                    <td>${item.localizacao || ""}</td>
+                                    <td>${item.status || ""}</td>
+                                    <td>
+                                        <button class="botao" onclick="editar(${item.id})">EDITAR</button>
+                                        <button class="botao" onclick="excluir(${item.id})">EXCLUIR</button>
+                                        <button class="botao" onclick="verEtiqueta(${item.id})">ETIQUETA</button>
+                                    </td>
+
+                                    <td>
+                                        ${item.qr_code 
+                                            ? `<img src="/media/${item.qr_code}" width="50">`
+                                            : ""}
+                                    </td>
+                                `;
+                                tabela.appendChild(tr);
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Erro:", error);
+                            const tabela = document.getElementById("tabela-itens");
+                            tabela.innerHTML = `
+                                <tr>
+                                    <td colspan="9">Erro ao carregar resultados</td>
+                                </tr>`;
+                        });
+                }
+
+                // busca automática
+                document.getElementById("filtro_material").addEventListener("input", () => carregarItens(1));
+                document.getElementById("filtro_localizacao").addEventListener("input", () => carregarItens(1));
+                document.getElementById("filtro_tipo").addEventListener("change", () => carregarItens(1));
+
+                // funções extras
+                function editar(id) {
+                    window.location.href = `/ptmdsa/cadptm/editar_item/${id}/`;
+                }
+
+                function excluir(id) {
+                if (!confirm("DESEJA REALMENTE EXCLUIR O PATRIMONIO?")) return;
+
+                    fetch(`/ptmdsa/cadptm/excluir_item/${id}/`, {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCSRFToken()        
+                        }
+                })
+                    .then(() => {
+                        alert("Excluído com sucesso!");
+                        location.reload(); // ✅ FORÇA atualização
+                    })
+                    .catch(error => {
+                        console.error("Erro:", error);
+                        location.reload(); // ✅ mesmo com erro, recarrega
+                    });
+                }
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    carregarItens();
+                    carregarGrafico();
+                });
+            </script>
+            <script>
+                function getCSRFToken() {
+                    const cookies = document.cookie.split("; ");
+                    for (let cookie of cookies) {
+                        if (cookie.startsWith("csrftoken=")) {
+                            return cookie.split("=")[1];
+                        }
+                    }
+                    return "";
+                }
+            </script>
+            <script>    
+                function verEtiqueta(id) {
+                    window.open(`/ptmdsa/cadptm/etiqueta/${id}/`, "_blank");
+                }
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        </div>
+    </body>
+</html>

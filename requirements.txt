@@ -1,0 +1,11 @@
+Django==4.2.30
+qrcode[pil]
+pandas
+openpyxl
+reportlab
+whitenoise
+dj-database-url
+psycopg2-binary
+numpy
+Pillow
+gunicorn

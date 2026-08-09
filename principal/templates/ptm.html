@@ -4,9 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTM</title>
-    <link rel="stylesheet" href="/static/css/principal.css"/>
+    <link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">   
+    <link rel="stylesheet" href="/static/principal/css/principal.css"/>    
+    <style>
+    .logo    position: fixed;.logo-topo {
+        top: 10px;
+        left: 10px;
+    }
+
+    .logo-topo img {
+        height: 120px;
+    }
+    </style>
 </head>
-<body>
+<body>    
+    <div class="logo-topo">
+        <img src="/media/logo.png" alt="Logo">
+    </div>
+
     <div class="page-container">
         <section class="hero">
             <span class="badge">PTM - PATRIMONIO</span>
@@ -27,10 +42,20 @@
                     <h2>Controle seguro</h2>
                     <p>O fluxo foi pensado para manter seus dados organizados, com foco em usabilidade e navegação objetiva.</p>
                 </div>
+                <div class="card">
+                    <h2>Controle eficiente</h2>
+                    <p>As funcionalidades permitem gerenciar o controle de ferramentas de forma eficiente, otimizando o tempo e os recursos.</p>
+                </div>
+                <div class="card">
+                    <h2>Brevemente: Ponto Eletronico</h2>
+                    <p>Registro de ponto eletronico..</p>
+                </div>
             </div>
             <div class="button-row">
-                <a href="/cadptm/" class="btn-primary">Ir para Cadastro de Patrimônio</a>
-                <a href="/" class="btn-secondary">Voltar ao Início</a>
+                <a href="/ptmdsa/cadptm/" class="btn-primary">Ir para Cadastro de Patrimônio</a>
+                <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary">Pesquisa Patrimonio</a>
+                <a href="/ptmdsa/cadferramentas/" class="btn-primary">Cadastro de Ferramentas</a>
+                <a href="/ptmdsa/cadferramentas/listar_ferramentas/" class="btn-primary">Pesquisa Ferramentas</a>
             </div>
         </section>
     </div>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listagem de Ferramentas</title>
+    <link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">   
+    <link rel="stylesheet" href="/static/principal/css/principal.css"/>   
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 95%;
+            max-width: 1400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005ea6;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .card-ferramenta {
+            background: white;
+            border-left: 5px solid #0078D4;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .card-ferramenta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,.15);
+        }
+
+        .codigo {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .card-ferramenta {
+            background: #fff;
+            border-left: 5px solid #0078D4;
+            border-radius: 10px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+            transition: all .3s ease;
+        }
+
+
+        .btn-editar {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #ffc107;
+            color: #000;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn-editar:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .logo-topo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-topo img {
+            max-height: 120px;
+            width: auto;
+        }
+
+        h1 {
+            text-align-bottom: 25px;
+        }
+
+        .acoes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .botao-menu {
+            text-decoration: none;
+            background: #0078D4;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            min-width: 220px;
+            text-align: center;
+            transition: .3s;
+        }
+
+        .botao-menu:hover {
+            background: #005ea6;
+        }
+
+        .acoes-listagem {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .btn-excel,
+        .btn-pdf {
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-excel {
+            background: #198754;
+        }
+
+        .btn-excel:hover {
+            background: #157347;
+        }
+
+        .btn-pdf {
+            background: #dc3545;
+        }
+
+        .btn-pdf:hover {
+            background: #bb2d3b;
+        }
+
+        .pagination{
+            text-align:center;
+            margin-top:30px;
+        }
+
+        .pagination a{
+            background:#0078D4;
+            color:white;
+            padding:8px 12px;
+            border-radius:5px;
+            text-decoration:none;
+            margin:5px;
+        }
+
+        .pagination span {
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        .kpis{
+            display:flex;
+            gap:20px;
+            margin-bottom:30px;
+        }
+
+        .kpi{
+            flex:1;
+            background:white;
+            border-radius:10px;
+            padding:20px;
+            text-align:center;
+            box-shadow:0 2px 10px rgba(0,0,0,.1);
+        }
+
+        .filtros{
+            margin-bottom:20px;
+        }
+
+        .graficos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .grafico-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.1);
+            height: 400px;
+        }
+
+        .grafico-card h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .grafico-card canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+    </style>
+</head>
+<body>
+
+<h2>PTM - DSA - FERRAMENTAS CADASTRADAS</h2>
+
+<form method="get" class="filtros">
+
+    <div class="row">
+
+        <div class="form-group">
+            <label>Local</label>
+
+            <select name="local">
+                <option value="">Todos</option>
+
+                <option value="COFEN">COFEN</option>
+                <option value="CAESB">CAESB</option>
+                <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)">
+                    VIAGEM
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Categoria</label>
+
+            <select name="categoria">
+                <option value="">Todas</option>
+
+                <option value="MANUAL">MANUAL</option>
+                <option value="ELÉTRICA">ELÉTRICA</option>
+                <option value="PNEUMÁTICA">PNEUMÁTICA</option>
+                <option value="MEDIÇÃO">MEDIÇÃO</option>
+                <option value="OUTROS">OUTROS</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button type="submit">
+        Filtrar
+    </button>
+
+</form>
+
+<div class="acoes-listagem">
+
+    <a href="{% url 'exportar_ferramentas_excel' %}">
+        Exportar Excel
+    </a>
+
+    <a href="{% url 'exportar_ferramentas_pdf' %}">
+        Exportar PDF
+    </a>
+
+</div>
+
+<div class="container">
+
+    <div class="logo-topo">
+        <img src="/media/logo.png" alt="Logo">
+    </div>
+
+    <h2>PTM - DSA - FERRAMENTAS CADASTRADAS</h2>
+
+    <p>
+        <strong>Total de Ferramentas:</strong>
+        {{ page_obj.paginator.count }}
+    </p>
+
+        <div class="cards">
+            {% for ferramenta in page_obj %}
+                <div class="card-ferramenta">
+
+                    <div class="codigo">
+                        {{ ferramenta.codigo }}
+                    </div>
+
+                    <h3>{{ ferramenta.nome }}</h3>
+
+                    <p><strong>Patrimônio:</strong> {{ ferramenta.patrimonio }}</p>
+                    <p><strong>Categoria:</strong> {{ ferramenta.categoria }}</p>
+                    <p><strong>Estado:</strong> {{ ferramenta.estado }}</p>
+                    <p><strong>Responsável:</strong> {{ ferramenta.responsavel.nome }}</p>
+                    <p><strong>Matrícula:</strong> {{ ferramenta.responsavel.matricula }}</p>
+                    <p><strong>Local:</strong> {{ ferramenta.local }}</p>
+
+                    <a href="{% url 'editar_ferramenta' ferramenta.id %}" class="btn-editar">
+                        Editar
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+
+        <section class="hero">
+            <div class="acoes">
+                <a href="/ptmdsa/cadptm/" class="btn-primary">Ir para Cadastro de Patrimônio</a>
+                <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary">Pesquisa Patrimonio</a>
+                <a href="/ptmdsa/cadferramentas/" class="btn-primary">Cadastro de Ferramentas</a>
+                <br>
+                <br>
+                <a href="/ptmdsa/cadferramentas/listar_ferramentas/" class="btn-primary">Ferramentas Cadastradas</a>
+            </div>
+        </section>
+</div>
+
+<div class="pagination">
+
+    {% if page_obj.has_previous %}
+        ?page=1
+
+        ?page={{ page_obj.previous_page_number }}
+            Anterior
+        </a>
+    {% endif %}
+
+    <span>
+        Página {{ page_obj.number }}
+        de
+        {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        ?page={{ page_obj.next_page_number }}
+            Próxima
+        </a>
+
+        ?page={{ page_obj.paginator.num_pages }}">
+            Última
+        </a>
+    {% endif %}
+
+</div>
+
+<div class="kpis">
+
+    <div class="kpi">
+        <h2>{{ total_ferramentas }}</h2>
+        <p>Total</p>
+    </div>
+
+    <div class="kpi">
+        <h2>{{ total_cofen }}</h2>
+        <p>COFEN</p>
+    </div>
+
+    <div class="kpi">
+        <h2>{{ total_caesb }}</h2>
+        <p>CAESB</p>
+    </div>
+
+</div>
+
+
+<canvas id="graficoCategoria"></canvas>
+
+    {{ por_categoria|json_script:"dados_categoria" }}
+
+<canvas id="graficoLocal"></canvas>
+
+    {{ por_local|json_script:"dados_local" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    const dadosCategoria =
+    JSON.parse(
+        document.getElementById(
+            "dados_categoria"
+        ).textContent
+    );
+
+    new Chart(
+        document.getElementById("graficoLocal"),
+        {
+            type: 'pie',
+            data: {
+                labels: [
+                    'COFEN',
+                    'CAESB'
+                ],
+                datasets: [{
+                    data: [
+                        15,
+                        24
+                    ]
+                }]
+            }
+        }
+    );
+
+</script>
+
+<script>
+
+    const locais =
+    JSON.parse(
+        document.getElementById(
+            'dados_local'
+        ).textContent
+    );
+
+    new Chart(
+        document.getElementById('graficoLocal'),
+        {
+            type:'pie',
+            data:{
+                labels: locais.map(
+                    item => item.local
+                ),
+                datasets:[{
+                    data: locais.map(
+                        item => item.total
+                    )
+                }]
+            }
+        }
+    );
+
+</script>
+
+<script>
+
+    const categorias =
+    JSON.parse(
+        document.getElementById(
+            'dados_categoria'
+        ).textContent
+    );
+
+    new Chart(
+        document.getElementById('graficoCategoria'),
+        {
+            type:'bar',
+            data:{
+                labels: categorias.map(
+                    item => item.categoria
+                ),
+                datasets:[{
+                    label:'Ferramentas',
+                    data: categorias.map(
+                        item => item.total
+                    ),
+                    backgroundColor:'#0078D4'
+                }]
+            }
+        }
+    );
+
+</script>
+
+</body>
+</html>

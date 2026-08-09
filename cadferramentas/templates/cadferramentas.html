@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Ferramentas</title>
+    <link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">   
+    <link rel="stylesheet" href="/static/principal/css/principal.css"/>   
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .container {
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 700px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005ea6;
+        }
+
+        .logo    position: fixed;.logo-topo {
+            top: 10px;
+            left: 10px;
+        }
+
+        .logo-topo img {
+            height: 120px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="logo-topo">
+        <img src="/media/logo.png" alt="Logo">
+    </div>
+
+    <h2>PTM - DSA - FERRAMENTAS</h2>
+
+    <form method="post" action="{% url 'cadastrar_ferramenta' %}">
+        {% csrf_token %}
+
+        <div class="form-group">
+        <label>A ferramenta possui patrimônio?</label>
+
+            <select id="possui_patrimonio" name="possui_patrimonio">
+                <option value="sim">Sim</option>
+                <option value="nao">Não</option>
+            </select>
+        </div>
+
+        <div class="row" id="patrimonio_div">
+            <div class="form-group">
+                <label for="patrimonio">Patrimônio</label>
+                <input type="text" id="patrimonio" name="patrimonio">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="nome">Nome da Ferramenta</label>
+            <input type="text" id="nome" name="nome" required>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="categoria">Categoria</label>
+                <select id="categoria" name="categoria">
+                    <option value="MANUAL">MANUAL</option>
+                    <option value="ELÉTRICA">ELÉTRICA</option>
+                    <option value="PNEUMÁTICA">PNEUMÁTICA</option>
+                    <option value="MEDIÇÃO">MEDIÇÃO</option>
+                    <option value="OUTROS">OUTROS</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fabricante">Fabricante</label>
+                <input type="text" id="fabricante" name="fabricante">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="data_aquisicao">Data de Aquisição</label>
+                <input type="date" id="data_aquisicao" name="data_aquisicao">
+            </div>
+
+            <div class="form-group">
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado">
+                    <option value="NOVO">NOVO</option>
+                    <option value="BOM">BOM</option>
+                    <option value="REGULAR">REGULAR</option>
+                    <option value="MANUTENCAO">MANUTENÇÃO</option>
+                    <option value="INUTILIZADO">INUTILIZADO</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="local">Local</label>
+                <select id="local" name="local">
+                    <option value="COFEN">COFEN</option>
+                    <option value="CAESB">CAESB</option>
+                    <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)">VIAGEM (ESPECIFICAR NA DESCRIÇÃO)</option>
+                </select>
+        </div>
+
+        <div class="form-group">
+            <label for="responsavel">
+                Responsável pela Ferramenta
+            </label>
+
+            <select id="responsavel" name="responsavel" required>
+
+                <option value="">
+                    Selecione um responsável
+                </option>
+
+                {% for servidor in servidores %}
+                <option value="{{ servidor.id }}">
+                    {{ servidor.nome }} - Matrícula {{ servidor.matricula }}
+                </option>
+                {% endfor %}
+
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <textarea id="descricao" name="descricao" rows="4"></textarea>
+        </div>
+
+        <button type="submit">Cadastrar Ferramenta</button>
+        <section class="hero">
+        <div class ="button-row">
+            <a href="/ptmdsa/cadptm/" class="btn-primary">Ir para Cadastro de Patrimônio</a>
+            <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary">Pesquisa Patrimonio</a>
+            <a href="/ptmdsa/cadferramentas/" class="btn-primary">Cadastro de Ferramentas</a>
+            <br>
+            <br>
+            <a href="/ptmdsa/cadferramentas/listar_ferramentas/" class="btn-primary">Ferramentas Cadastradas</a>
+        </div>
+        </section>
+
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const possuiPatrimonio = document.getElementById("possui_patrimonio");
+    const patrimonioDiv = document.getElementById("patrimonio_div");
+    const patrimonioInput = document.getElementById("patrimonio");
+
+    function controlarPatrimonio() {
+        if (possuiPatrimonio.value === "nao") {
+            patrimonioDiv.style.display = "none";
+            patrimonioInput.value = "sem_patrimonio";
+        } else {
+            patrimonioDiv.style.display = "block";
+
+            if (patrimonioInput.value === "sem_patrimonio") {
+                patrimonioInput.value = "";
+            }
+        }
+    }
+
+    const uppercaseFields = document.querySelectorAll('input[type="text"], textarea');
+    const selectFields = document.querySelectorAll('select');
+
+    uppercaseFields.forEach(field => {
+        field.addEventListener("input", function () {
+            this.value = this.value.toUpperCase();
+        });
+    });
+
+    document.querySelector('form').addEventListener('submit', function () {
+        uppercaseFields.forEach(field => {
+            field.value = field.value.toUpperCase();
+        });
+        selectFields.forEach(select => {
+            if (select.value) {
+                select.value = select.value.toUpperCase();
+            }
+        });
+    });
+
+    possuiPatrimonio.addEventListener("change", controlarPatrimonio);
+
+    controlarPatrimonio();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1 @@
+web: gunicorn ptm.wsgi:application --log-file -

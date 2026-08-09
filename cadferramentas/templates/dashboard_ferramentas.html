@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+.kpi{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:8px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Dashboard de Ferramentas</h2>
+
+<a href="{% url 'dashboard_ferramentas' %}">
+    Dashboard
+</a>
+
+<div class="kpi">
+    Total de Ferramentas:
+    {{ total_ferramentas }}
+</div>
+
+<canvas id="graficoCategoria"></canvas>
+
+{{ por_categoria|json_script:"dados_categoria" }}
+
+<script>
+
+const categorias =
+    JSON.parse(
+        document.getElementById(
+        'dados_categoria'
+    ).textContent
+);
+
+    new Chart(
+        document.getElementById('graficoCategoria'),
+            {
+                type:'bar',
+                    data:{
+                            labels: categorias.map(
+                            item => item.categoria
+                        ),
+                        datasets:[{
+                            label:'Quantidade',
+                            data: categorias.map(
+                            item => item.total
+                        ),
+                        backgroundColor:'#0078D4'
+                    }]
+                }
+            }
+        );
+
+</script>
+
+</body>
+</html>

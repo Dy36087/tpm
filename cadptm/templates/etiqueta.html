@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PTM - ETIQUETA</title>
+<link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">
+<style>
+    body { font-family: Arial; text-align: center; }
+    .etiqueta {
+        width: 300px;
+        border: 2px solid black;
+        padding: 10px;
+    }
+    .logo    position: fixed;.logo-topo {
+        top: 10px;
+        left: 10px;
+    }
+
+    .logo-topo img {
+        height: 120px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="logo-topo">
+        <img src="/media/logo.png" alt="Logo">
+</div>
+
+<div class="etiqueta">
+    <h3>{{ item.patrimonio }}</h3>
+    <p>{{ item.material }}</p>
+
+    {% if item.qr_code %}
+        <img src="{{ item.qr_code.url }}" width="150">
+    {% else %}
+        <p>QR Code não disponível</p>
+    {% endif %}
+</div>
+
+<script>
+    window.onload = () => window.print();
+</script>
+
+</body>
+</html>
