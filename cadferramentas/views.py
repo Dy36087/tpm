@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .models import Ferramenta
 from django.shortcuts import get_object_or_404
@@ -20,6 +21,7 @@ except ImportError:  # pragma: no cover - dependência opcional
 # Create your views here.
 
 
+@login_required
 def dashboard_ferramentas(request):
 
     total_ferramentas = Ferramenta.objects.count()
@@ -45,6 +47,7 @@ def dashboard_ferramentas(request):
     )
 
 
+@login_required
 def exportar_ferramentas_pdf(request):
     if canvas is None:
         return HttpResponse(
@@ -85,6 +88,7 @@ def exportar_ferramentas_pdf(request):
     return response
 
 
+@login_required
 def exportar_ferramentas_excel(request):
     if Workbook is None:
         return HttpResponse(
@@ -138,6 +142,7 @@ def exportar_ferramentas_excel(request):
     return response
 
 
+@login_required
 def cadferramentas(request):
 
     servidores = Servidor.objects.all().order_by("nome")
@@ -145,6 +150,7 @@ def cadferramentas(request):
     return render(request, "cadferramentas.html", {"servidores": servidores})
 
 
+@login_required
 def listar_ferramentas(request):
 
     ferramentas = Ferramenta.objects.all().order_by("codigo")
@@ -176,6 +182,7 @@ def listar_ferramentas(request):
     )
 
 
+@login_required
 def cadastrar_ferramenta(request):
     if request.method == "POST":
         possui_patrimonio = request.POST.get("possui_patrimonio")
@@ -219,6 +226,7 @@ def cadastrar_ferramenta(request):
     return render(request, "cadferramentas.html")
 
 
+@login_required
 def editar_ferramenta(request, id):
 
     ferramenta = get_object_or_404(Ferramenta, id=id)

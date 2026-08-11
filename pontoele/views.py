@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -20,89 +21,58 @@ except ImportError:  # pragma: no cover
 # Create your views here.
 def gerar_matricula():
 
-    ultimo = Servidor.objects.order_by(
-        "-id"
-    ).first()
+    ultimo = Servidor.objects.order_by("-id").first()
 
     if ultimo:
 
-        numero = int(
-            ultimo.matricula[4:]
-        ) + 1
+        numero = int(ultimo.matricula[4:]) + 1
 
     else:
         numero = 1
 
     return f"DSAF{numero:04d}"
 
+
+@login_required
 def cadfaceptm(request):
     return render(request, "cadfaceptm.html")
 
 
+@login_required
 def pontoeleptm(request):
     return render(request, "pontoeleptm.html")
 
+
+@login_required
 def usersfaceptm(request):
     servidores = Servidor.objects.all()
-    return render(
-        request,
-        "usersfaceptm.html",
-        {
-            "servidores": servidores
-        }
-    )
+    return render(request, "usersfaceptm.html", {"servidores": servidores})
+
 
 @csrf_exempt
+@login_required
 def cadastrar_face(request):
 
-    dados = json.loads(
-        request.body
-    )
+    dados = json.loads(request.body)
 
     servidor = Servidor.objects.create(
-
         matricula=gerar_matricula(),
-
         nome=dados["nome"],
-
         cpf=dados["cpf"],
-
         rg=dados["rg"],
-
-        data_nascimento=
-            dados["data_nascimento"],
-
+        data_nascimento=dados["data_nascimento"],
         email=dados["email"],
-
-        telefone=
-            dados["telefone"],
-
+        telefone=dados["telefone"],
         cep=dados["cep"],
-
-        endereco=
-            dados["endereco"],
-
-        bairro=
-            dados["bairro"],
-
-        cidade=
-            dados["cidade"],
-
+        endereco=dados["endereco"],
+        bairro=dados["bairro"],
+        cidade=dados["cidade"],
         uf=dados["uf"],
-
-        face_encoding=
-            dados["face_encoding"]
-
+        face_encoding=dados["face_encoding"],
     )
 
-    return JsonResponse({
+    return JsonResponse({"sucesso": True, "matricula": servidor.matricula})
 
-        "sucesso": True,
-
-        "matricula":
-            servidor.matricula
-
-    })
 
 def distancia_metros(lat1, lon1, lat2, lon2):
 
@@ -113,48 +83,38 @@ def distancia_metros(lat1, lon1, lat2, lon2):
 
     a = (
         sin(dLat / 2) ** 2
-        + cos(radians(lat1))
-        * cos(radians(lat2))
-        * sin(dLon / 2) ** 2
+        + cos(radians(lat1)) * cos(radians(lat2)) * sin(dLon / 2) ** 2
     )
 
-    c = 2 * atan2(
-        sqrt(a),
-        sqrt(1 - a)
-    )
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     return R * c
 
+
 def validar_sequencia(servidor, tipo):
 
-    ultimo = RegistroPonto.objects.filter(
-        servidor=servidor
-    ).order_by("-data_hora").first()
+    ultimo = (
+        RegistroPonto.objects.filter(servidor=servidor).order_by("-data_hora").first()
+    )
 
     if ultimo is None:
         return tipo == "entrada"
 
     regras = {
-
         "entrada": "saida_pausa",
-
         "saida_pausa": "retorno_pausa",
-
         "retorno_pausa": "saida",
-
-        "saida": "entrada"
-
+        "saida": "entrada",
     }
 
     return regras.get(ultimo.tipo) == tipo
 
 
 @csrf_exempt
+@login_required
 def registrar_ponto(request):
 
-    dados = json.loads(
-        request.body
-    )
+    dados = json.loads(request.body)
 
     matricula = dados["matricula"]
 
@@ -162,175 +122,80 @@ def registrar_ponto(request):
 
     foto = dados["foto"]
 
-    latitude = float(
-        dados["latitude"]
-    )
+    latitude = float(dados["latitude"])
 
-    longitude = float(
-        dados["longitude"]
-    )
+    longitude = float(dados["longitude"])
 
-    servidor = Servidor.objects.get(
-        matricula=matricula
-    )
+    servidor = Servidor.objects.get(matricula=matricula)
 
     # Reconhecimento facial
 
-    
     encoding_atual = dados["face_encoding"]
 
-    autorizado = validar_face(
-
-        servidor.face_encoding,
-
-        encoding_atual
-
-    )
-
+    autorizado = validar_face(servidor.face_encoding, encoding_atual)
 
     if not autorizado:
 
-        return JsonResponse({
-
-            "autorizado": False,
-            "erro": "Face não reconhecida"
-
-        })
+        return JsonResponse({"autorizado": False, "erro": "Face não reconhecida"})
 
     # Geolocalização
     LOCAIS = {
-
-        "entrada": {
-            "lat": -15.794229,
-            "lon": -47.882166,
-            "raio": 100
-        },
-
-        "saida_pausa": {
-            "lat": -15.794229,
-            "lon": -47.882166,
-            "raio": 100
-        },
-
-        "retorno_pausa": {
-            "lat": -15.794229,
-            "lon": -47.882166,
-            "raio": 100
-        },
-
-        "saida": {
-            "lat": -15.794229,
-            "lon": -47.882166,
-            "raio": 100
-        }
-
+        "entrada": {"lat": -15.794229, "lon": -47.882166, "raio": 100},
+        "saida_pausa": {"lat": -15.794229, "lon": -47.882166, "raio": 100},
+        "retorno_pausa": {"lat": -15.794229, "lon": -47.882166, "raio": 100},
+        "saida": {"lat": -15.794229, "lon": -47.882166, "raio": 100},
     }
 
     local = LOCAIS[tipo]
 
-    distancia = distancia_metros(
-
-        latitude,
-        longitude,
-
-        local["lat"],
-        local["lon"]
-
-    )
+    distancia = distancia_metros(latitude, longitude, local["lat"], local["lon"])
 
     if distancia > local["raio"]:
 
-        return JsonResponse({
-
-            "autorizado": False,
-            "erro": "Fora do local autorizado"
-
-        })
+        return JsonResponse({"autorizado": False, "erro": "Fora do local autorizado"})
 
     # Sequência
 
-    if not validar_sequencia(
-        servidor,
-        tipo
-    ):
+    if not validar_sequencia(servidor, tipo):
 
-        return JsonResponse({
-
-            "autorizado": False,
-            "erro": "Sequência de ponto inválida"
-
-        })
+        return JsonResponse(
+            {"autorizado": False, "erro": "Sequência de ponto inválida"}
+        )
 
     RegistroPonto.objects.create(
-
-        servidor=servidor,
-
-        tipo=tipo,
-
-        latitude=latitude,
-
-        longitude=longitude
-
+        servidor=servidor, tipo=tipo, latitude=latitude, longitude=longitude
     )
 
-    return JsonResponse({
-        "autorizado": True,
-        "mensagem": "Registro de ponto realizado com sucesso"
-    })
+    return JsonResponse(
+        {"autorizado": True, "mensagem": "Registro de ponto realizado com sucesso"}
+    )
 
 
-def validar_face(
-    encoding_salvo,
-    encoding_atual
-):
+def validar_face(encoding_salvo, encoding_atual):
     if np is None:
         return False
 
     try:
-        distancia = np.linalg.norm(
-            np.array(encoding_salvo)
-            -
-            np.array(encoding_atual)
-        )
+        distancia = np.linalg.norm(np.array(encoding_salvo) - np.array(encoding_atual))
         return distancia < 0.45
     except Exception:
         return False
 
 
-
 def listar_servidores(request):
 
-    pesquisa = request.GET.get(
-        "q",
-        ""
-    )
+    pesquisa = request.GET.get("q", "")
 
     servidores = Servidor.objects.all()
 
     if pesquisa:
 
         servidores = servidores.filter(
-
             nome__icontains=pesquisa
-
-        ) | Servidor.objects.filter(
-
-            matricula__icontains=pesquisa
-
-        )
+        ) | Servidor.objects.filter(matricula__icontains=pesquisa)
 
     return render(
-
         request,
-
         "listar_servidores.html",
-
-        {
-
-            "servidores": servidores,
-
-            "pesquisa": pesquisa
-
-        }
-
+        {"servidores": servidores, "pesquisa": pesquisa},
     )

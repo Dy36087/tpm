@@ -35,7 +35,13 @@ try:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table, TableStyle
+    from reportlab.platypus import (
+        Image,
+        Paragraph,
+        SimpleDocTemplate,
+        Table,
+        TableStyle,
+    )
 except ImportError:  # pragma: no cover
     A4 = None
     colors = None
@@ -74,6 +80,7 @@ def _require_export_dependencies():
     return missing
 
 
+@login_required
 def dashboard(request):
 
     dados = Patrimonio.objects.values("status").annotate(total=Count("id"))
@@ -90,7 +97,9 @@ def dashboard(request):
 def etiqueta(request, id):
     item = Patrimonio.objects.filter(id=id).first()
     if not item:
-        return HttpResponse("Item não encontrado.", status=404, content_type="text/plain")
+        return HttpResponse(
+            "Item não encontrado.", status=404, content_type="text/plain"
+        )
     return render(request, "etiqueta.html", {"item": item})
 
 
@@ -338,7 +347,9 @@ def pesquisar(request):
 def editar_item(request, id):
     item = Patrimonio.objects.filter(id=id).first()
     if not item:
-        return HttpResponse("Item não encontrado.", status=404, content_type="text/plain")
+        return HttpResponse(
+            "Item não encontrado.", status=404, content_type="text/plain"
+        )
     form = PatrimonioForm(request.POST or None, instance=item)
 
     if request.method == "POST" and form.is_valid():
@@ -354,14 +365,20 @@ def exportar_filtro(request, formato, busca, status):
     itens = Patrimonio.objects.all()
 
     if busca != "todos":
-        itens = itens.filter(Q(patrimonio__icontains=busca) | Q(material__icontains=busca))
+        itens = itens.filter(
+            Q(patrimonio__icontains=busca) | Q(material__icontains=busca)
+        )
 
     if status != "todos":
         itens = itens.filter(status=status)
 
     ids = ",".join(str(item.id) for item in itens)
     if not ids:
-        return HttpResponse("Nenhum item encontrado para exportação.", status=404, content_type="text/plain")
+        return HttpResponse(
+            "Nenhum item encontrado para exportação.",
+            status=404,
+            content_type="text/plain",
+        )
 
     return redirect("exportar", formato=formato, ids=ids)
 
@@ -404,6 +421,7 @@ def listar_itens(request, busca, status):
     )
 
 
+@login_required
 @require_POST
 def excluir_item(request, id):
     try:
