@@ -36,13 +36,19 @@ SECRET_KEY = os.environ.get(
 )
 
 IS_HEROKU = bool(os.environ.get("DYNO") or os.environ.get("HEROKU_APP_NAME"))
-DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
+DEBUG = os.environ.get("DJANGO_DEBUG", "0" if IS_HEROKU else "1") == "1"
 
 if IS_HEROKU:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ptm.settings")
 
 # Hosts
-DEFAULT_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", ".herokuapp.com", ".app.github.dev"]
+DEFAULT_ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    ".herokuapp.com",
+    ".app.github.dev",
+]
 
 
 def get_allowed_hosts():
@@ -80,7 +86,12 @@ CSRF_TRUSTED_ORIGINS = [
 
 if IS_HEROKU:
     ALLOWED_HOSTS = ["*"]
-    CSRF_TRUSTED_ORIGINS = ["https://*.herokuapp.com", "https://*.app.github.dev", "https://*.github.dev"]
+    CSRF_TRUSTED_ORIGINS = [
+        "https://*.herokuapp.com",
+        "https://*.app.github.dev",
+        "https://*.github.dev",
+        "https://*.herokuapp.com/",
+    ]
 else:
     ALLOWED_HOSTS = ["*"]
     CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
@@ -145,7 +156,7 @@ WSGI_APPLICATION = "ptm.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Usar DATABASE_URL em produção (Postgres), SQLite em desenvolvimento
-if "DATABASE_URL" in os.environ:
+if "DATABASE_URL" in os.environ or os.environ.get("HEROKU_POSTGRESQL_COLOR"):
     DATABASES = {
         "default": dj_database_url.config(
             default=os.environ.get("DATABASE_URL"), conn_max_age=600
@@ -195,18 +206,25 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "templates/static"),
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "templates", "static"),
     os.path.join(BASE_DIR, "static"),
-)
+]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
 
-# Use WhiteNoise to serve static files in production when installed
-if WHITENOISE_INSTALLED:
-    STORAGES = {
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-    }
+# Garantir que o ambiente online use o banco e os arquivos corretos
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if WHITENOISE_INSTALLED
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        )
+    },
+}
 
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
@@ -218,5 +236,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Autenticação: URLs de redirecionamento padrão
 LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/patrimonio/"
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"

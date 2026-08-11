@@ -1,11 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Ferramentas</title>
-    <link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">   
-    <link rel="stylesheet" href="/static/principal/css/principal.css"/>   
+<link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}"/>
 
     <style>
         body {
@@ -93,7 +94,7 @@
 <div class="container">
 
     <div class="logo-topo">
-        <img src="/media/logo.png" alt="Logo">
+        <img src="{% static 'principal/img/logo.png' %}" alt="Logo">
     </div>
 
     <h2>PTM - DSA - FERRAMENTAS</h2>

@@ -1,15 +1,18 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTM</title>
-    <link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">   
-    <link rel="stylesheet" href="/static/principal/css/principal.css"/>    
+    <link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}"/>
     <style>
-    .logo    position: fixed;.logo-topo {
+    .logo-topo {
+        position: fixed;
         top: 10px;
         left: 10px;
+        z-index: 10;
     }
 
     .logo-topo img {
@@ -17,9 +20,9 @@
     }
     </style>
 </head>
-<body>    
+<body>
     <div class="logo-topo">
-        <img src="/media/logo.png" alt="Logo">
+        <img src="{% static 'principal/img/logo.png' %}" alt="Logo">
     </div>
 
     <div class="page-container">

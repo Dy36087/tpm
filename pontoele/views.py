@@ -10,7 +10,11 @@ from math import cos
 from math import sqrt
 from math import atan2
 import json
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover
+    np = None
 
 
 # Create your views here.
@@ -279,16 +283,18 @@ def validar_face(
     encoding_salvo,
     encoding_atual
 ):
+    if np is None:
+        return False
 
-    distancia = np.linalg.norm(
-
-        np.array(encoding_salvo)
-        -
-        np.array(encoding_atual)
-
-    )
-
-    return distancia < 0.45
+    try:
+        distancia = np.linalg.norm(
+            np.array(encoding_salvo)
+            -
+            np.array(encoding_atual)
+        )
+        return distancia < 0.45
+    except Exception:
+        return False
 
 
 

@@ -1,5 +1,11 @@
 Django==4.2.30
+Pillow
 whitenoise
 dj-database-url
 psycopg2-binary
 gunicorn
+pandas
+openpyxl
+reportlab
+qrcode
+barcode

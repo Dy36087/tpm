@@ -3,52 +3,54 @@ from .models import Ferramenta
 from django.shortcuts import get_object_or_404
 from pontoele.models import Servidor
 from django.http import HttpResponse
-from openpyxl import Workbook
-from .models import Ferramenta
-from reportlab.pdfgen import canvas
 from django.core.paginator import Paginator
 from django.db.models import Count
 
+try:
+    from openpyxl import Workbook
+except ImportError:  # pragma: no cover - dependência opcional
+    Workbook = None
+
+try:
+    from reportlab.pdfgen import canvas
+except ImportError:  # pragma: no cover - dependência opcional
+    canvas = None
+
 
 # Create your views here.
+
 
 def dashboard_ferramentas(request):
 
     total_ferramentas = Ferramenta.objects.count()
 
-    total_cofen = Ferramenta.objects.filter(
-        local="COFEN"
-    ).count()
+    total_cofen = Ferramenta.objects.filter(local="COFEN").count()
 
-    total_caesb = Ferramenta.objects.filter(
-        local="CAESB"
-    ).count()
+    total_caesb = Ferramenta.objects.filter(local="CAESB").count()
 
-    por_categoria = (
-        Ferramenta.objects
-        .values("categoria")
-        .annotate(total=Count("id"))
-    )
+    por_categoria = Ferramenta.objects.values("categoria").annotate(total=Count("id"))
 
-    por_local = (
-        Ferramenta.objects
-        .values("local")
-        .annotate(total=Count("id"))
-    )
+    por_local = Ferramenta.objects.values("local").annotate(total=Count("id"))
 
     return render(
-    request,
-    "dashboard_ferramentas.html",
-    {
-        "total_ferramentas": total_ferramentas,
-        "total_cofen": total_cofen,
-        "total_caesb": total_caesb,
-        "por_categoria": list(por_categoria),
-        "por_local": list(por_local),
-    }
-)
-    
+        request,
+        "dashboard_ferramentas.html",
+        {
+            "total_ferramentas": total_ferramentas,
+            "total_cofen": total_cofen,
+            "total_caesb": total_caesb,
+            "por_categoria": list(por_categoria),
+            "por_local": list(por_local),
+        },
+    )
+
+
 def exportar_ferramentas_pdf(request):
+    if canvas is None:
+        return HttpResponse(
+            "A dependência reportlab não está instalada.",
+            status=500,
+        )
 
     response = HttpResponse(content_type="application/pdf")
 
@@ -84,6 +86,11 @@ def exportar_ferramentas_pdf(request):
 
 
 def exportar_ferramentas_excel(request):
+    if Workbook is None:
+        return HttpResponse(
+            "A dependência openpyxl não está instalada.",
+            status=500,
+        )
 
     wb = Workbook()
     ws = wb.active
@@ -138,15 +145,10 @@ def cadferramentas(request):
     return render(request, "cadferramentas.html", {"servidores": servidores})
 
 
-
 def listar_ferramentas(request):
 
     ferramentas = Ferramenta.objects.all().order_by("codigo")
-    por_local = list(
-    Ferramenta.objects
-    .values("local")
-    .annotate(total=Count("id"))
-)
+    por_local = list(Ferramenta.objects.values("local").annotate(total=Count("id")))
 
     por_local = request.GET.get("local")
     categoria = request.GET.get("categoria")
@@ -170,48 +172,51 @@ def listar_ferramentas(request):
             "page_obj": page_obj,
             "local_selecionado": por_local,
             "categoria_selecionada": categoria,
-        }
+        },
     )
 
 
 def cadastrar_ferramenta(request):
     if request.method == "POST":
-
         possui_patrimonio = request.POST.get("possui_patrimonio")
+        patrimonio = "SEM_PATRIMONIO"
+        categoria = ""
+        fabricante = ""
+        nome = ""
+        data_aquisicao = ""
+        estado = ""
+        local = ""
+        descricao = ""
+        responsavel = None
 
-        if possui_patrimonio == "nao":
-            patrimonio = "SEM_PATRIMONIO"
-        else:
+        if possui_patrimonio != "nao":
             patrimonio = request.POST.get("patrimonio", "").strip().upper()
             categoria = request.POST.get("categoria", "").strip().upper()
             fabricante = request.POST.get("fabricante", "").strip().upper()
             nome = request.POST.get("nome", "").strip().upper()
-            data_aquisicao = request.POST.get("data_aquisicao").strip().upper()
+            data_aquisicao = request.POST.get("data_aquisicao", "").strip().upper()
             estado = request.POST.get("estado", "").strip().upper()
             local = request.POST.get("local", "").strip().upper()
             descricao = request.POST.get("descricao", "").strip().upper()
-            responsavel_id = request.POST.get("responsavel").strip().upper()
-            responsavel = None
+            responsavel_id = request.POST.get("responsavel", "").strip()
+            if responsavel_id:
+                responsavel = Servidor.objects.filter(id=responsavel_id).first()
 
-        if responsavel_id:
-            responsavel = Servidor.objects.get(id=responsavel_id)
-            ferramenta = Ferramenta(
-                patrimonio=patrimonio,
-                categoria=categoria,
-                fabricante=fabricante,
-                nome=nome,
-                data_aquisicao=data_aquisicao if data_aquisicao else None,
-                estado=estado,
-                local=local,
-                descricao=descricao,
-                responsavel=responsavel,
-            )
+        ferramenta = Ferramenta(
+            patrimonio=patrimonio,
+            categoria=categoria,
+            fabricante=fabricante,
+            nome=nome,
+            data_aquisicao=data_aquisicao if data_aquisicao else None,
+            estado=estado,
+            local=local,
+            descricao=descricao,
+            responsavel=responsavel,
+        )
+        ferramenta.save()
+        return redirect("cadferramentas")
 
-            ferramenta.save()
-
-            return redirect("cadferramentas")
-
-        return render(request, "cadferramentas.html")
+    return render(request, "cadferramentas.html")
 
 
 def editar_ferramenta(request, id):

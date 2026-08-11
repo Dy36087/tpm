@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>PTM - ETIQUETA</title>
-<link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">
+<link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}">
 <style>
     body { font-family: Arial; text-align: center; }
     .etiqueta {
@@ -11,7 +12,8 @@
         border: 2px solid black;
         padding: 10px;
     }
-    .logo    position: fixed;.logo-topo {
+    .logo-topo {
+        position: fixed;
         top: 10px;
         left: 10px;
     }
@@ -25,7 +27,7 @@
 <body>
 
 <div class="logo-topo">
-        <img src="/media/logo.png" alt="Logo">
+        <img src="{% static 'principal/img/logo.png' %}" alt="Logo">
 </div>
 
 <div class="etiqueta">

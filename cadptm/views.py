@@ -1,47 +1,77 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.views.decorators.http import require_POST
-from django.db import transaction
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from django.core.paginator import Paginator
-from .models import Patrimonio
-from .models import SequenciaPatrimonio
-from .models import Auditoria
-from .forms import PatrimonioForm
-from io import BytesIO
-from django.core.files.base import ContentFile
-import pandas as pd
-from io import BytesIO
-from django.core.files.base import ContentFile
+import logging
 import uuid
+from datetime import datetime
+from io import BytesIO
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
+from django.core.paginator import Paginator
+from django.db import transaction
+from django.db.models import Count, Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from .forms import PatrimonioForm
+from .models import Auditoria, Patrimonio, SequenciaPatrimonio
+
+logger = logging.getLogger(__name__)
+
+try:
+    import pandas as pd
+except ImportError:  # pragma: no cover
+    pd = None
 
 try:
     import qrcode  # noqa: F401
 except ImportError:  # pragma: no cover
     qrcode = None
-from django.utils import timezone
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from io import BytesIO
-from datetime import datetime
-from openpyxl import Workbook
-from openpyxl.drawing.image import Image as XLImage
-from openpyxl.styles import Font
-from openpyxl.styles import Border, Side
+
+try:
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table, TableStyle
+except ImportError:  # pragma: no cover
+    A4 = None
+    colors = None
+    getSampleStyleSheet = None
+    Image = None
+    Paragraph = None
+    SimpleDocTemplate = None
+    Table = None
+    TableStyle = None
+
+try:
+    from openpyxl import Workbook
+    from openpyxl.drawing.image import Image as XLImage
+    from openpyxl.styles import Border, Font, Side
+except ImportError:  # pragma: no cover
+    Workbook = None
+    XLImage = None
+    Font = None
+    Border = None
+    Side = None
 
 try:
     import barcode
-except ImportError:
+except ImportError:  # pragma: no cover
     barcode = None
 
-from django.db.models import Count
+
+def _require_export_dependencies():
+    missing = []
+    if Workbook is None or Font is None or XLImage is None:
+        missing.append("openpyxl")
+    if SimpleDocTemplate is None or Table is None or Paragraph is None or A4 is None:
+        missing.append("reportlab")
+    if pd is None:
+        missing.append("pandas")
+    return missing
 
 
 def dashboard(request):
@@ -58,7 +88,9 @@ def dashboard(request):
 
 @login_required
 def etiqueta(request, id):
-    item = Patrimonio.objects.get(id=id)
+    item = Patrimonio.objects.filter(id=id).first()
+    if not item:
+        return HttpResponse("Item não encontrado.", status=404, content_type="text/plain")
     return render(request, "etiqueta.html", {"item": item})
 
 
@@ -66,6 +98,15 @@ def etiqueta(request, id):
 def exportar_excel_etiqueta(request, ids):
     ids_list = ids.split(",")
     itens = Patrimonio.objects.filter(id__in=ids_list)
+
+    missing = _require_export_dependencies()
+    if missing:
+        logger.warning("Dependências de exportação ausentes: %s", ", ".join(missing))
+        return HttpResponse(
+            "Exportação indisponível no momento.",
+            status=503,
+            content_type="text/plain",
+        )
 
     wb = Workbook()
     ws = wb.active
@@ -107,6 +148,15 @@ def exportar(request, formato, ids):
 
     ids_list = ids.split(",")
     itens = Patrimonio.objects.filter(id__in=ids_list)
+
+    missing = _require_export_dependencies()
+    if missing:
+        logger.warning("Dependências de exportação ausentes: %s", ", ".join(missing))
+        return HttpResponse(
+            "Exportação indisponível no momento.",
+            status=503,
+            content_type="text/plain",
+        )
 
     wb = Workbook()
     ws = wb.active
@@ -285,6 +335,38 @@ def pesquisar(request):
 
 
 @login_required
+def editar_item(request, id):
+    item = Patrimonio.objects.filter(id=id).first()
+    if not item:
+        return HttpResponse("Item não encontrado.", status=404, content_type="text/plain")
+    form = PatrimonioForm(request.POST or None, instance=item)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "PATRIMÔNIO ATUALIZADO COM SUCESSO!")
+        return redirect("pesquisar")
+
+    return render(request, "cadptm.html", {"form": form, "editar": True, "item": item})
+
+
+@login_required
+def exportar_filtro(request, formato, busca, status):
+    itens = Patrimonio.objects.all()
+
+    if busca != "todos":
+        itens = itens.filter(Q(patrimonio__icontains=busca) | Q(material__icontains=busca))
+
+    if status != "todos":
+        itens = itens.filter(status=status)
+
+    ids = ",".join(str(item.id) for item in itens)
+    if not ids:
+        return HttpResponse("Nenhum item encontrado para exportação.", status=404, content_type="text/plain")
+
+    return redirect("exportar", formato=formato, ids=ids)
+
+
+@login_required
 def listar_itens(request, busca, status):
     itens = Patrimonio.objects.all()
 
@@ -326,7 +408,6 @@ def listar_itens(request, busca, status):
 def excluir_item(request, id):
     try:
         item = Patrimonio.objects.get(id=id)
-        nome = item.patrimonio  # salva antes de deletar
         item.delete()
 
         Auditoria.objects.create(
