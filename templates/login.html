@@ -1,25 +1,26 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
     <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}" />
-</head>
-<body>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
+  </head>
+  <body>
     <div class="page-container">
-        <section class="hero">
-            <h1>Entrar</h1>
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                {% if next %}
-                    <input type="hidden" name="next" value="{{ next }}" />
-                {% endif %}
-                <button type="submit" class="btn-primary">Entrar</button>
-            </form>
-        </section>
+      <section class="hero">
+        <h1>Entrar</h1>
+        <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          {% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
+          {% endif %}
+          <button type="submit" class="btn-primary">Entrar</button>
+        </form>
+      </section>
     </div>
-</body>
+  </body>
 </html>

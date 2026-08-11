@@ -3,9 +3,11 @@
 <html lang="pt-br">
     <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTM - PESQUISA PATRIMONIO</title>
-    <link rel="shortcut icon" type="imagex/png" href="/static/principal/img/logo.png">   
-    <link rel="stylesheet" href="/static/principal/css/principal.css"/>   
+    <link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}"/>
 
         <style>
             body {
@@ -83,6 +85,30 @@
                 gap: 10px;
             }
 
+
+            @media (max-width: 768px) {
+                body {
+                    padding: 12px;
+                }
+
+                .container {
+                    padding: 12px;
+                }
+
+                .row {
+                    flex-direction: column;
+                }
+
+                .actions {
+                    flex-direction: column;
+                }
+
+                .btn-secondary,
+                .botao,
+                button {
+                    width: 100%;
+                }
+            }
             table {
                 width: 100%;
                 border-collapse: collapse;

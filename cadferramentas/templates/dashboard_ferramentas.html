@@ -1,71 +1,67 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
+    <style>
+      .kpi {
+        background: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+      }
+      
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+      }
+      
+      @media (max-width: 768px) {
+        body {
+          padding: 12px;
+        }
+      }
+    </style>
+  </head>
 
-.kpi{
-    background:white;
-    padding:20px;
-    margin-bottom:20px;
-    border-radius:8px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
-}
+  <body>
+    <h2>Dashboard de Ferramentas</h2>
 
-</style>
+    <a href="{% url 'dashboard_ferramentas' %}">Dashboard</a>
 
-</head>
+    <div class="kpi">Total de Ferramentas:
+      {{ total_ferramentas }}</div>
 
-<body>
+    <canvas id="graficoCategoria"></canvas>
 
-<h2>Dashboard de Ferramentas</h2>
+    {{ por_categoria|json_script:'dados_categoria' }}
 
-<a href="{% url 'dashboard_ferramentas' %}">
-    Dashboard
-</a>
-
-<div class="kpi">
-    Total de Ferramentas:
-    {{ total_ferramentas }}
-</div>
-
-<canvas id="graficoCategoria"></canvas>
-
-{{ por_categoria|json_script:"dados_categoria" }}
-
-<script>
-
-const categorias =
-    JSON.parse(
-        document.getElementById(
-        'dados_categoria'
-    ).textContent
-);
-
-    new Chart(
-        document.getElementById('graficoCategoria'),
+    <script>
+      const categorias = JSON.parse(document.getElementById('dados_categoria').textContent)
+      
+      new Chart(document.getElementById('graficoCategoria'), {
+        type: 'bar',
+        data: {
+          labels: categorias.map((item) => item.categoria),
+          datasets: [
             {
-                type:'bar',
-                    data:{
-                            labels: categorias.map(
-                            item => item.categoria
-                        ),
-                        datasets:[{
-                            label:'Quantidade',
-                            data: categorias.map(
-                            item => item.total
-                        ),
-                        backgroundColor:'#0078D4'
-                    }]
-                }
+              label: 'Quantidade',
+              data: categorias.map((item) => item.total),
+              backgroundColor: '#0078D4'
             }
-        );
-
-</script>
-
-</body>
+          ]
+        }
+      })
+    </script>
+  </body>
 </html>

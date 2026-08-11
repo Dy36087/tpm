@@ -1,0 +1,105 @@
+* {
+  box-sizing: border-box;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.page-container,
+.container {
+  width: 100%;
+}
+
+.button-row,
+.acoes,
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button-row a,
+.acoes a,
+.btns a,
+.btn-primary,
+.btn-secondary,
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+table {
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    margin: 0;
+    padding: 12px !important;
+  }
+
+  .page-container,
+  .container,
+  .hero,
+  .card,
+  .box {
+    padding: 14px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .logo-topo {
+    position: static !important;
+    text-align: center !important;
+    width: auto !important;
+    margin-bottom: 12px !important;
+  }
+
+  .logo-topo img {
+    height: 84px !important;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .button-row,
+  .acoes,
+  .btns {
+    flex-direction: column;
+  }
+
+  .button-row a,
+  .acoes a,
+  .btns a,
+  .btn-primary,
+  .btn-secondary,
+  .botao,
+  button {
+    width: 100% !important;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

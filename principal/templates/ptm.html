@@ -1,66 +1,74 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PTM</title>
-    <link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}">
-    <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}"/>
+    <link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}" />
+    <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
     <style>
-    .logo-topo {
+      .logo-topo {
         position: fixed;
         top: 10px;
         left: 10px;
         z-index: 10;
-    }
-
-    .logo-topo img {
+      }
+      
+      .logo-topo img {
         height: 120px;
-    }
+      }
+      
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 14px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="logo-topo">
-        <img src="{% static 'principal/img/logo.png' %}" alt="Logo">
+      <img src="{% static 'principal/img/logo.png' %}" alt="Logo" />
     </div>
 
     <div class="page-container">
-        <section class="hero">
-            <span class="badge">PTM - PATRIMONIO</span>
-            <div>
-                <h1>Gestão de Patrimônio Inteligente</h1>
-                <p>Organize, consulte e registre os ativos da sua empresa em uma interface clara e moderna. Esta página foi criada para centralizar a visão geral do patrimônio e facilitar o acesso ao cadastro de novos itens.</p>
-            </div>
-            <div class="cards">
-                <div class="card">
-                    <h2>Visão rápida</h2>
-                    <p>Veja o status dos ativos, acompanhe registros recentes e acesse imediatamente a função de cadastro de patrimônio.</p>
-                </div>
-                <div class="card">
-                    <h2>Cadastro ágil</h2>
-                    <p>Use o botão abaixo para ir direto ao formulário de cadastro de patrimônio e registrar novas entradas rapidamente.</p>
-                </div>
-                <div class="card">
-                    <h2>Controle seguro</h2>
-                    <p>O fluxo foi pensado para manter seus dados organizados, com foco em usabilidade e navegação objetiva.</p>
-                </div>
-                <div class="card">
-                    <h2>Controle eficiente</h2>
-                    <p>As funcionalidades permitem gerenciar o controle de ferramentas de forma eficiente, otimizando o tempo e os recursos.</p>
-                </div>
-                <div class="card">
-                    <h2>Brevemente: Ponto Eletronico</h2>
-                    <p>Registro de ponto eletronico..</p>
-                </div>
-            </div>
-            <div class="button-row">
-                <a href="/ptmdsa/cadptm/" class="btn-primary">Ir para Cadastro de Patrimônio</a>
-                <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary">Pesquisa Patrimonio</a>
-                <a href="/ptmdsa/cadferramentas/" class="btn-primary">Cadastro de Ferramentas</a>
-                <a href="/ptmdsa/cadferramentas/listar_ferramentas/" class="btn-primary">Pesquisa Ferramentas</a>
-            </div>
-        </section>
+      <section class="hero">
+        <span class="badge">PTM - PATRIMONIO</span>
+        <div>
+          <h1>Gestão de Patrimônio Inteligente</h1>
+          <p>Organize, consulte e registre os ativos da sua empresa em uma interface clara e moderna. Esta página foi criada para centralizar a visão geral do patrimônio e facilitar o acesso ao cadastro de novos itens.</p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <h2>Visão rápida</h2>
+            <p>Veja o status dos ativos, acompanhe registros recentes e acesse imediatamente a função de cadastro de patrimônio.</p>
+          </div>
+          <div class="card">
+            <h2>Cadastro ágil</h2>
+            <p>Use o botão abaixo para ir direto ao formulário de cadastro de patrimônio e registrar novas entradas rapidamente.</p>
+          </div>
+          <div class="card">
+            <h2>Controle seguro</h2>
+            <p>O fluxo foi pensado para manter seus dados organizados, com foco em usabilidade e navegação objetiva.</p>
+          </div>
+          <div class="card">
+            <h2>Controle eficiente</h2>
+            <p>As funcionalidades permitem gerenciar o controle de ferramentas de forma eficiente, otimizando o tempo e os recursos.</p>
+          </div>
+          <div class="card">
+            <h2>Brevemente: Ponto Eletronico</h2>
+            <p>Registro de ponto eletronico..</p>
+          </div>
+        </div>
+        <div class="button-row">
+          <a href="/ptmdsa/cadptm/" class="btn-primary">Ir para Cadastro de Patrimônio</a>
+          <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary">Pesquisa Patrimonio</a>
+          <a href="/ptmdsa/cadferramentas/" class="btn-primary">Cadastro de Ferramentas</a>
+          <a href="/ptmdsa/cadferramentas/listar_ferramentas/" class="btn-primary">Pesquisa Ferramentas</a>
+        </div>
+      </section>
     </div>
-</body>
+  </body>
 </html>

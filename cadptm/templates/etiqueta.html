@@ -1,49 +1,60 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>PTM - ETIQUETA</title>
-<link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}">
-<style>
-    body { font-family: Arial; text-align: center; }
-    .etiqueta {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PTM - ETIQUETA</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}" />
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
+    <style>
+      body {
+        font-family: Arial;
+        text-align: center;
+      }
+      .etiqueta {
         width: 300px;
         border: 2px solid black;
         padding: 10px;
-    }
-    .logo-topo {
+      }
+      .logo-topo {
         position: fixed;
         top: 10px;
         left: 10px;
-    }
-
-    .logo-topo img {
+      }
+      
+      .logo-topo img {
         height: 120px;
-    }
-</style>
-</head>
+      }
+      
+      @media (max-width: 768px) {
+        .etiqueta {
+          width: 100%;
+          max-width: 320px;
+          margin: 0 auto;
+        }
+      }
+    </style>
+  </head>
 
-<body>
+  <body>
+    <div class="logo-topo">
+      <img src="{% static 'principal/img/logo.png' %}" alt="Logo" />
+    </div>
 
-<div class="logo-topo">
-        <img src="{% static 'principal/img/logo.png' %}" alt="Logo">
-</div>
+    <div class="etiqueta">
+      <h3>{{ item.patrimonio }}</h3>
+      <p>{{ item.material }}</p>
 
-<div class="etiqueta">
-    <h3>{{ item.patrimonio }}</h3>
-    <p>{{ item.material }}</p>
-
-    {% if item.qr_code %}
-        <img src="{{ item.qr_code.url }}" width="150">
-    {% else %}
+      {% if item.qr_code %}
+        <img src="{{ item.qr_code.url }}" width="150" />
+      {% else %}
         <p>QR Code não disponível</p>
-    {% endif %}
-</div>
+      {% endif %}
+    </div>
 
-<script>
-    window.onload = () => window.print();
-</script>
-
-</body>
+    <script>
+      window.onload = () => window.print()
+    </script>
+  </body>
 </html>

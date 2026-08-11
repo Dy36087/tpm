@@ -7,6 +7,7 @@
     <title>Listagem de Ferramentas</title>
 <link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}">
     <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}"/>
 
     <style>
         body {
@@ -264,6 +265,27 @@
         .grafico-card canvas {
             width: 100% !important;
             height: 300px !important;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                width: 100%;
+                padding: 14px;
+            }
+
+            .graficos {
+                grid-template-columns: 1fr;
+            }
+
+            .kpis,
+            .acoes-listagem,
+            .row {
+                flex-direction: column;
+            }
         }
     </style>
 </head>

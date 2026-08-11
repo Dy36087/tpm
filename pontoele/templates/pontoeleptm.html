@@ -1,307 +1,255 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>Registro de Ponto</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/responsive.css" />
+    <title>Registro de Ponto</title>
 
-<style>
-body {
-    font-family: Arial;
-    margin: 20px;
-    background: #f4f6f9;
-}
-
-.container {
-    max-width: 500px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px #ccc;
-}
-
-h2 {
-    text-align: center;
-}
-
-.input-group {
-    margin-bottom: 15px;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    background: #2d89ef;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #1b5fbd;
-}
-
-.hora {
-    font-size: 18px;
-    text-align: center;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-.mensagem {
-    text-align: center;
-    margin-top: 15px;
-    color: green;
-}
-
-const locaisPermitidos = {
-
-    entrada: {
-        latitude: -15.794229,
-        longitude: -47.882166,
-        raio: 100
-    },
-
-    saida_pausa: {
-        latitude: -15.794229,
-        longitude: -47.882166,
-        raio: 100
-    },
-
-    retorno_pausa: {
-        latitude: -15.794229,
-        longitude: -47.882166,
-        raio: 100
-    },
-
-    saida: {
-        latitude: -15.794229,
-        longitude: -47.882166,
-        raio: 100
-    }
-
-};
-
-LOCAIS = {
-
-    "entrada": {
-        "lat": -15.794229,
-        "lon": -47.882166,
-        "raio": 100
-    },
-
-    "saida_pausa": {
-        "lat": -15.794229,
-        "lon": -47.882166,
-        "raio": 100
-    },
-
-    "retorno_pausa": {
-        "lat": -15.794229,
-        "lon": -47.882166,
-        "raio": 100
-    },
-
-    "saida": {
-        "lat": -15.794229,
-        "lon": -47.882166,
-        "raio": 100
-    }
-
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-    <h2>🕒 Registro de Ponto</h2>
-
-    <div class="hora" id="horaAtual"></div>
-
-    <div class="input-group">
-        <input type="text" id="nome" placeholder="Nome do servidor">
-    </div>
-
-    <div class="input-group">
-        <input type="text" id="matricula" placeholder="Matrícula">
-    </div>
-
-    <button onclick="registrar()">📌 Registrar Ponto</button>
-
-    <div class="mensagem" id="msg"></div>
-
-    
-    <div class="input-group">
-        <select id="tipoPonto" style="width:100%;padding:10px;">
-            <option value="">Selecione</option>
-            <option value="entrada">Entrada Trabalho</option>
-            <option value="saida_pausa">Saída Pausa</option>
-            <option value="retorno_pausa">Retorno Pausa</option>
-            <option value="saida">Saída Trabalho</option>
-        </select>
-    </div>
-
-    <video id="camera" width="100%" autoplay></video>
-    <canvas id="canvas" style="display:none;"></canvas>
-
-
-</div>
-
-<script>
-// ✅ HORA EM TEMPO REAL
-function atualizarHora() {
-    const agora = new Date();
-    const hora = agora.toLocaleString("pt-BR");
-    document.getElementById("horaAtual").innerText = hora;
-}
-setInterval(atualizarHora, 1000);
-atualizarHora();
-
-// ✅ REGISTRAR PONTO
-async function registrar() {
-
-    const nome = document.getElementById("nome").value;
-    const matricula = document.getElementById("matricula").value;
-    const tipoPonto = document.getElementById("tipoPonto").value;
-
-    if (!nome || !matricula || !tipoPonto) {
-        alert("Preencha todos os campos.");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(async(posicao) => {
-
-        const latitude = posicao.coords.latitude;
-        const longitude = posicao.coords.longitude;
-
-        const local = LOCAIS[tipoPonto];
-
-        const distancia = calcularDistancia(
-            latitude,
-            longitude,
-            local["lat"],
-            local.longitude
-        );
-
-        if (distancia > local.raio) {
-
-            alert("Você não está no local autorizado para esta marcação.");
-
-            return;
+    <style>
+      body {
+        font-family: Arial;
+        margin: 20px;
+        background: #f4f6f9;
+      }
+      
+      .container {
+        max-width: 500px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px #ccc;
+      }
+      
+      h2 {
+        text-align: center;
+      }
+      
+      .input-group {
+        margin-bottom: 15px;
+      }
+      
+      input {
+        width: 100%;
+        padding: 10px;
+      }
+      
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #2d89ef;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      
+      button:hover {
+        background: #1b5fbd;
+      }
+      
+      .hora {
+        font-size: 18px;
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+      
+      .mensagem {
+        text-align: center;
+        margin-top: 15px;
+        color: green;
+      }
+      
+      @media (max-width: 768px) {
+        body {
+          margin: 0;
+          padding: 12px;
         }
+      
+        .container {
+          padding: 14px;
+        }
+      }
+    </style>
+  </head>
 
-        // Captura foto
-        const video = document.getElementById("camera");
-        const canvas = document.getElementById("canvas");
+  <body>
+    <div class="container">
+      <h2>🕒 Registro de Ponto</h2>
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+      <div class="hora" id="horaAtual"></div>
 
-        const ctx = canvas.getContext("2d");
+      <div class="input-group">
+        <input type="text" id="nome" placeholder="Nome do servidor" />
+      </div>
 
-        ctx.drawImage(video, 0, 0);
+      <div class="input-group">
+        <input type="text" id="matricula" placeholder="Matrícula" />
+      </div>
 
-        const fotoBase64 = canvas.toDataURL("image/jpeg");
+      <button onclick="registrar()">📌 Registrar Ponto</button>
 
-        const dataHora = new Date().toLocaleString("pt-BR");
+      <div class="mensagem" id="msg"></div>
 
-        fetch("/registrar_ponto/", {
+      <div class="input-group">
+        <select id="tipoPonto" style="width:100%;padding:10px;">
+          <option value="">Selecione</option>
+          <option value="entrada">Entrada Trabalho</option>
+          <option value="saida_pausa">Saída Pausa</option>
+          <option value="retorno_pausa">Retorno Pausa</option>
+          <option value="saida">Saída Trabalho</option>
+        </select>
+      </div>
 
-            method: "POST",
+      <video id="camera" width="100%" autoplay></video>
+      <canvas id="canvas" style="display:none;"></canvas>
+    </div>
 
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCSRFToken()
-            },
-
-            body: JSON.stringify({
-
+    <script>
+      const LOCAIS = {
+        entrada: {
+          lat: -15.794229,
+          lon: -47.882166,
+          raio: 100
+        },
+        saida_pausa: {
+          lat: -15.794229,
+          lon: -47.882166,
+          raio: 100
+        },
+        retorno_pausa: {
+          lat: -15.794229,
+          lon: -47.882166,
+          raio: 100
+        },
+        saida: {
+          lat: -15.794229,
+          lon: -47.882166,
+          raio: 100
+        }
+      }
+      
+      // ✅ HORA EM TEMPO REAL
+      function atualizarHora() {
+        const agora = new Date()
+        const hora = agora.toLocaleString('pt-BR')
+        document.getElementById('horaAtual').innerText = hora
+      }
+      setInterval(atualizarHora, 1000)
+      atualizarHora()
+      
+      // ✅ REGISTRAR PONTO
+      async function registrar() {
+        const nome = document.getElementById('nome').value
+        const matricula = document.getElementById('matricula').value
+        const tipoPonto = document.getElementById('tipoPonto').value
+      
+        if (!nome || !matricula || !tipoPonto) {
+          alert('Preencha todos os campos.')
+          return
+        }
+      
+        navigator.geolocation.getCurrentPosition(
+          async (posicao) => {
+            const latitude = posicao.coords.latitude
+            const longitude = posicao.coords.longitude
+      
+            const local = LOCAIS[tipoPonto]
+      
+            const distancia = calcularDistancia(latitude, longitude, local['lat'], local.longitude)
+      
+            if (distancia > local.raio) {
+              alert('Você não está no local autorizado para esta marcação.')
+      
+              return
+            }
+      
+            // Captura foto
+            const video = document.getElementById('camera')
+            const canvas = document.getElementById('canvas')
+      
+            canvas.width = video.videoWidth
+            canvas.height = video.videoHeight
+      
+            const ctx = canvas.getContext('2d')
+      
+            ctx.drawImage(video, 0, 0)
+      
+            const fotoBase64 = canvas.toDataURL('image/jpeg')
+      
+            const dataHora = new Date().toLocaleString('pt-BR')
+      
+            fetch('/registrar_ponto/', {
+              method: 'POST',
+      
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+              },
+      
+              body: JSON.stringify({
                 nome,
                 matricula,
                 tipoPonto,
                 dataHora,
-
+      
                 latitude,
                 longitude,
-
+      
                 foto: fotoBase64
-
+              })
             })
+              .then((res) => res.json())
+              .then((dados) => {
+                if (dados.autorizado) {
+                  document.getElementById('msg').innerText = '✅ Ponto registrado com sucesso.'
+                } else {
+                  alert('Reconhecimento facial não autorizado.')
+                }
+              })
+          },
+          () => {
+            alert('Não foi possível obter sua localização.')
+          }
+        )
+      }
+    </script>
 
+    <script>
+      function getCSRFToken() {
+        return document.cookie
+          .split('; ')
+          .find((c) => c.startsWith('csrftoken'))
+          ?.split('=')[1]
+      }
+    </script>
+
+    <script>
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          document.getElementById('camera').srcObject = stream
         })
-        .then(res => res.json())
-        .then(dados => {
+        .catch(() => {
+          alert('Não foi possível acessar a câmera.')
+        })
+    </script>
 
-            if (dados.autorizado) {
-
-                document.getElementById("msg").innerText =
-                    "✅ Ponto registrado com sucesso.";
-
-            } else {
-
-                alert("Reconhecimento facial não autorizado.");
-
-            }
-
-        });
-
-    }, () => {
-
-        alert("Não foi possível obter sua localização.");
-
-    });
-
-}
-</script>
-
-<script>
-    function getCSRFToken() {
-    return document.cookie
-        .split("; ")
-        .find(c => c.startsWith("csrftoken"))
-        ?.split("=")[1];
-}
-</script>
-
-<script>
-        navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-        document.getElementById("camera").srcObject = stream;
-    })
-    .catch(() => {
-        alert("Não foi possível acessar a câmera.");
-    });
-</script>
-
-<script>
-    function calcularDistancia(lat1, lon1, lat2, lon2) {
-
-    const R = 6371000;
-
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c;
-}
-</script>
-
-</body>
+    <script>
+      function calcularDistancia(lat1, lon1, lat2, lon2) {
+        const R = 6371000
+      
+        const dLat = ((lat2 - lat1) * Math.PI) / 180
+        const dLon = ((lon2 - lon1) * Math.PI) / 180
+      
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+      
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      
+        return R * c
+      }
+    </script>
+  </body>
 </html>
