@@ -182,6 +182,7 @@ def validar_face(encoding_salvo, encoding_atual):
         return False
 
 
+@login_required
 def listar_servidores(request):
 
     pesquisa = request.GET.get("q", "")

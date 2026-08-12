@@ -18,6 +18,11 @@ class LoginRedirectTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/")
 
+    def test_home_requires_login(self):
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login/", response.url)
+
     def test_app_pages_require_login(self):
         for route in ["ptmprincipal", "cadptm", "dashboard", "pesquisar"]:
             response = self.client.get(reverse(route))
