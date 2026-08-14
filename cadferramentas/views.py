@@ -154,21 +154,29 @@ def cadferramentas(request):
 def listar_ferramentas(request):
 
     ferramentas = Ferramenta.objects.all().order_by("codigo")
-    por_local = list(Ferramenta.objects.values("local").annotate(total=Count("id")))
-
-    por_local = request.GET.get("local")
+    local_filtro = request.GET.get("local")
     categoria = request.GET.get("categoria")
 
-    if por_local:
-        ferramentas = ferramentas.filter(local=por_local)
+    if local_filtro:
+        ferramentas = ferramentas.filter(local=local_filtro)
 
     if categoria:
         ferramentas = ferramentas.filter(categoria=categoria)
 
+    total_ferramentas = ferramentas.count()
+    total_cofen = ferramentas.filter(local="COFEN").count()
+    total_caesb = ferramentas.filter(local="CAESB").count()
+    por_categoria = list(
+        ferramentas.values("categoria")
+        .annotate(total=Count("id"))
+        .order_by("categoria")
+    )
+    por_local = list(
+        ferramentas.values("local").annotate(total=Count("id")).order_by("local")
+    )
+
     paginator = Paginator(ferramentas, 12)
-
     page_number = request.GET.get("page")
-
     page_obj = paginator.get_page(page_number)
 
     return render(
@@ -176,8 +184,13 @@ def listar_ferramentas(request):
         "listarferramentas.html",
         {
             "page_obj": page_obj,
-            "local_selecionado": por_local,
+            "local_selecionado": local_filtro,
             "categoria_selecionada": categoria,
+            "total_ferramentas": total_ferramentas,
+            "total_cofen": total_cofen,
+            "total_caesb": total_caesb,
+            "por_categoria": por_categoria,
+            "por_local": por_local,
         },
     )
 

@@ -401,9 +401,10 @@
 <div class="pagination">
 
     {% if page_obj.has_previous %}
-        ?page=1
-
-        ?page={{ page_obj.previous_page_number }}
+        <a href="?page=1{% if local_selecionado %}&local={{ local_selecionado }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">
+            Primeira
+        </a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if local_selecionado %}&local={{ local_selecionado }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">
             Anterior
         </a>
     {% endif %}
@@ -415,16 +416,19 @@
     </span>
 
     {% if page_obj.has_next %}
-        ?page={{ page_obj.next_page_number }}
+        <a href="?page={{ page_obj.next_page_number }}{% if local_selecionado %}&local={{ local_selecionado }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">
             Próxima
         </a>
-
-        ?page={{ page_obj.paginator.num_pages }}">
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if local_selecionado %}&local={{ local_selecionado }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">
             Última
         </a>
     {% endif %}
 
 </div>
+
+<br>
+<br>
+<br>
 
 <div class="kpis">
 
