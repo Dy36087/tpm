@@ -1,7 +1,33 @@
+from django.conf import settings
 from django.db import models
 from pontoele.models import Servidor
 
 # Create your models here.
+
+
+class HistoricoAlteracaoFerramenta(models.Model):
+    ferramenta = models.ForeignKey(
+        "Ferramenta",
+        on_delete=models.CASCADE,
+        related_name="historicos",
+    )
+    campo = models.CharField(max_length=100)
+    valor_anterior = models.TextField(blank=True, null=True)
+    valor_novo = models.TextField(blank=True, null=True)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="historicos_ferramentas",
+    )
+    data_hora = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-data_hora"]
+
+    def __str__(self):
+        return f"{self.ferramenta.codigo} - {self.campo}"
 
 
 class Ferramenta(models.Model):
@@ -15,7 +41,13 @@ class Ferramenta(models.Model):
     local = models.CharField(max_length=100, blank=True)
     descricao = models.TextField(blank=True, null=True)
     observacao = models.TextField(blank=True, null=True)
-    responsavel = models.ForeignKey('pontoele.Servidor', on_delete=models.SET_NULL, null=True, blank=True, related_name='ferramenta')
+    responsavel = models.ForeignKey(
+        "pontoele.Servidor",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ferramenta",
+    )
 
     def save(self, *args, **kwargs):
         if not self.codigo:

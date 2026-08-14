@@ -295,29 +295,37 @@
     <form method="post">
       {% csrf_token %}
 
-      <label>Patrimônio</label>
-      <input type="text" name="patrimonio" value="{{ ferramenta.patrimonio }}" />
-
       <label>Nome</label>
       <input type="text" name="nome" value="{{ ferramenta.nome }}" />
 
-      <label>Categoria</label>
-      <input type="text" name="categoria" value="{{ ferramenta.categoria }}" />
+      <div class="form-group">
+        <label for="possui_patrimonio">Possui Patrimônio?</label>
+        <select id="possui_patrimonio" name="possui_patrimonio">
+          <option value="sim" {% if ferramenta.possui_patrimonio == "sim" %}selected{% endif %}>Sim</option>
+          <option value="nao" {% if ferramenta.possui_patrimonio == "nao" %}selected{% endif %}>Não</option>
+        </select>
+      </div>
 
       <label>Fabricante</label>
       <input type="text" name="fabricante" value="{{ ferramenta.fabricante }}" />
 
-      <label>Estado</label>
-      <input type="text" name="estado" value="{{ ferramenta.estado }}" />
+      <div class="form-group">
+          <label for="local">Local</label>
+          <select id="local" name="local">
+            <option value="COFEN" {% if ferramenta.local == "COFEN" %}selected{% endif %}>COFEN</option>
+            <option value="CAESB" {% if ferramenta.local == "CAESB" %}selected{% endif %}>CAESB</option>
+            <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" {% if ferramenta.local == "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" %}selected{% endif %}>VIAGEM (ESPECIFICAR NA DESCRIÇÃO)</option>
+          </select>
+      </div>
 
       <div class="form-group">
         <label for="estado">Estado</label>
         <select id="estado" name="estado">
-          <option value="NOVO">NOVO</option>
-          <option value="BOM">BOM</option>
-          <option value="REGULAR">REGULAR</option>
-          <option value="MANUTENCAO">MANUTENÇÃO</option>
-          <option value="INUTILIZADO">INUTILIZADO</option>
+          <option value="NOVO" {% if ferramenta.estado == "NOVO" %}selected{% endif %}>NOVO</option>
+          <option value="BOM" {% if ferramenta.estado == "BOM" %}selected{% endif %}>BOM</option>
+          <option value="REGULAR" {% if ferramenta.estado == "REGULAR" %}selected{% endif %}>REGULAR</option>
+          <option value="MANUTENCAO" {% if ferramenta.estado == "MANUTENCAO" %}selected{% endif %}>MANUTENÇÃO</option>
+          <option value="INUTILIZADO" {% if ferramenta.estado == "INUTILIZADO" %}selected{% endif %}>INUTILIZADO</option>
         </select>
       </div>
 

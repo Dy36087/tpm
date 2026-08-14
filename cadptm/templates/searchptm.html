@@ -497,6 +497,7 @@
                                         <button class="botao" onclick="editar(${item.id})">EDITAR</button>
                                         <button class="botao" onclick="excluir(${item.id})">EXCLUIR</button>
                                         <button class="botao" onclick="verEtiqueta(${item.id})">ETIQUETA</button>
+                                        <button class="botao" onclick="historico(${item.id})">HISTÓRICO</button>
                                     </td>
 
                                     <td>
@@ -567,6 +568,10 @@
             <script>    
                 function verEtiqueta(id) {
                     window.open(`/ptmdsa/cadptm/etiqueta/${id}/`, "_blank");
+                }
+
+                function historico(id) {
+                    window.open(`/ptmdsa/cadptm/historico/${id}/`, "_blank");
                 }
             </script>
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

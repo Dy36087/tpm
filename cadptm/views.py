@@ -17,7 +17,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .forms import PatrimonioForm
-from .models import Auditoria, Patrimonio, SequenciaPatrimonio
+from .models import (
+    Auditoria,
+    HistoricoAlteracaoPatrimonio,
+    Patrimonio,
+    SequenciaPatrimonio,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -324,12 +329,60 @@ def exportar(request, formato, ids):
     return response
 
 
+def _normalizar_valor_historico(valor):
+    if valor is None:
+        return ""
+    if hasattr(valor, "isoformat"):
+        return valor.isoformat()
+    return str(valor)
+
+
+def _registrar_historico_alteracao(item, form, usuario, valores_anteriores=None):
+    campos = [
+        "tipo",
+        "codigo",
+        "material",
+        "destino",
+        "estado_conservacao",
+        "quantidade",
+        "valor",
+        "data_aquisicao",
+        "localizacao",
+        "status",
+    ]
+
+    if valores_anteriores is None:
+        valores_anteriores = {
+            campo: _normalizar_valor_historico(getattr(item, campo)) for campo in campos
+        }
+
+    for campo in campos:
+        valor_anterior = valores_anteriores.get(campo, "")
+        valor_novo = _normalizar_valor_historico(form.cleaned_data.get(campo))
+
+        if valor_anterior != valor_novo:
+            HistoricoAlteracaoPatrimonio.objects.create(
+                item=item,
+                campo=campo,
+                valor_anterior=valor_anterior,
+                valor_novo=valor_novo,
+                usuario=usuario,
+            )
+
+
 @login_required
 def cadptm(request):
     if request.method == "POST":
         form = PatrimonioForm(request.POST)
         if form.is_valid():
-            form.save()
+            item = form.save()
+            HistoricoAlteracaoPatrimonio.objects.create(
+                item=item,
+                campo="cadastro",
+                valor_anterior="",
+                valor_novo="item cadastrado",
+                usuario=request.user,
+            )
             messages.success(request, "PATRIMONIO CADASTRADO COM SUCESSO!")
             return redirect("cadptm")
     else:
@@ -344,6 +397,22 @@ def pesquisar(request):
 
 
 @login_required
+def historico_item(request, id):
+    item = Patrimonio.objects.filter(id=id).first()
+    if not item:
+        return HttpResponse(
+            "Item não encontrado.", status=404, content_type="text/plain"
+        )
+
+    historico = item.historicos.select_related("usuario").all()
+    return render(
+        request,
+        "historico_patrimonio.html",
+        {"item": item, "historico": historico},
+    )
+
+
+@login_required
 def editar_item(request, id):
     item = Patrimonio.objects.filter(id=id).first()
     if not item:
@@ -352,10 +421,28 @@ def editar_item(request, id):
         )
     form = PatrimonioForm(request.POST or None, instance=item)
 
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "PATRIMÔNIO ATUALIZADO COM SUCESSO!")
-        return redirect("pesquisar")
+    if request.method == "POST":
+        valores_anteriores = {
+            campo: _normalizar_valor_historico(getattr(item, campo))
+            for campo in [
+                "tipo",
+                "codigo",
+                "material",
+                "destino",
+                "estado_conservacao",
+                "quantidade",
+                "valor",
+                "data_aquisicao",
+                "localizacao",
+                "status",
+            ]
+        }
+
+        if form.is_valid():
+            _registrar_historico_alteracao(item, form, request.user, valores_anteriores)
+            form.save()
+            messages.success(request, "PATRIMÔNIO ATUALIZADO COM SUCESSO!")
+            return redirect("pesquisar")
 
     return render(request, "cadptm.html", {"form": form, "editar": True, "item": item})
 

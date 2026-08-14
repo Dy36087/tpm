@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .models import Ferramenta
+from .models import Ferramenta, HistoricoAlteracaoFerramenta
 from django.shortcuts import get_object_or_404
 from pontoele.models import Servidor
 from django.http import HttpResponse
@@ -226,22 +226,95 @@ def cadastrar_ferramenta(request):
     return render(request, "cadferramentas.html")
 
 
+def _normalizar_valor_historico(valor):
+    if valor is None:
+        return ""
+    if hasattr(valor, "isoformat"):
+        return valor.isoformat()
+    return str(valor)
+
+
+def _registrar_historico_ferramenta(ferramenta, dados_novos, usuario):
+    campos = [
+        "patrimonio",
+        "categoria",
+        "fabricante",
+        "nome",
+        "data_aquisicao",
+        "estado",
+        "local",
+        "descricao",
+        "observacao",
+    ]
+
+    for campo in campos:
+        valor_anterior = _normalizar_valor_historico(getattr(ferramenta, campo))
+        valor_novo = _normalizar_valor_historico(dados_novos.get(campo))
+        if valor_anterior != valor_novo:
+            HistoricoAlteracaoFerramenta.objects.create(
+                ferramenta=ferramenta,
+                campo=campo,
+                valor_anterior=valor_anterior,
+                valor_novo=valor_novo,
+                usuario=usuario,
+            )
+
+
+@login_required
+def historico_ferramenta(request, id):
+    ferramenta = get_object_or_404(Ferramenta, id=id)
+    historico = ferramenta.historicos.select_related("usuario").all()
+    return render(
+        request,
+        "historico_ferramenta.html",
+        {"ferramenta": ferramenta, "historico": historico},
+    )
+
+
 @login_required
 def editar_ferramenta(request, id):
 
     ferramenta = get_object_or_404(Ferramenta, id=id)
 
     if request.method == "POST":
+        valores_anteriores = {
+            campo: _normalizar_valor_historico(getattr(ferramenta, campo))
+            for campo in [
+                "patrimonio",
+                "categoria",
+                "fabricante",
+                "nome",
+                "data_aquisicao",
+                "estado",
+                "local",
+                "descricao",
+                "observacao",
+            ]
+        }
 
-        ferramenta.patrimonio = request.POST.get("patrimonio", "")
-        ferramenta.nome = request.POST.get("nome", "")
-        ferramenta.categoria = request.POST.get("categoria", "")
-        ferramenta.fabricante = request.POST.get("fabricante", "")
-        ferramenta.data_aquisicao = request.POST.get("data_aquisicao") or None
-        ferramenta.estado = request.POST.get("estado", "")
-        ferramenta.local = request.POST.get("local", "")
-        ferramenta.descricao = request.POST.get("descricao", "")
-        ferramenta.observacao = request.POST.get("observacao", "")
+        dados_novos = {
+            "patrimonio": request.POST.get("patrimonio", ""),
+            "nome": request.POST.get("nome", ""),
+            "categoria": request.POST.get("categoria", ""),
+            "fabricante": request.POST.get("fabricante", ""),
+            "data_aquisicao": request.POST.get("data_aquisicao") or None,
+            "estado": request.POST.get("estado", ""),
+            "local": request.POST.get("local", ""),
+            "descricao": request.POST.get("descricao", ""),
+            "observacao": request.POST.get("observacao", ""),
+        }
+
+        _registrar_historico_ferramenta(ferramenta, dados_novos, request.user)
+
+        ferramenta.patrimonio = dados_novos["patrimonio"]
+        ferramenta.nome = dados_novos["nome"]
+        ferramenta.categoria = dados_novos["categoria"]
+        ferramenta.fabricante = dados_novos["fabricante"]
+        ferramenta.data_aquisicao = dados_novos["data_aquisicao"]
+        ferramenta.estado = dados_novos["estado"]
+        ferramenta.local = dados_novos["local"]
+        ferramenta.descricao = dados_novos["descricao"]
+        ferramenta.observacao = dados_novos["observacao"]
 
         ferramenta.save()
 

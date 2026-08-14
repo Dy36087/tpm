@@ -29,6 +29,32 @@ class Auditoria(models.Model):
         app_label = "cadptm"
 
 
+class HistoricoAlteracaoPatrimonio(models.Model):
+    item = models.ForeignKey(
+        "Patrimonio",
+        on_delete=models.CASCADE,
+        related_name="historicos",
+    )
+    campo = models.CharField(max_length=100)
+    valor_anterior = models.TextField(blank=True, null=True)
+    valor_novo = models.TextField(blank=True, null=True)
+    usuario = models.ForeignKey(
+        "auth.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="historicos_patrimonio",
+    )
+    data_hora = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "cadptm"
+        ordering = ["-data_hora"]
+
+    def __str__(self):
+        return f"{self.item.patrimonio} - {self.campo}"
+
+
 class Patrimonio(models.Model):
     TIPO = [
         ("proprio", "Proprio"),
