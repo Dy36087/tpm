@@ -20,6 +20,31 @@ class HistoricoFerramentaTest(TestCase):
             password="admin123",
         )
 
+    def test_cadastrar_ferramenta_salva_possui_patrimonio(self):
+        client = Client()
+        client.force_login(self.user)
+
+        response = client.post(
+            "/ptmdsa/cadferramentas/cadastrar/",
+            {
+                "possui_patrimonio": "nao",
+                "nome": "Alicate",
+                "categoria": "MANUAL",
+                "fabricante": "Bosch",
+                "data_aquisicao": "2024-03-01",
+                "estado": "NOVO",
+                "local": "COFEN",
+                "descricao": "Ferramenta de teste",
+                "responsavel": "",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        ferramenta = Ferramenta.objects.latest("id")
+        self.assertEqual(ferramenta.possui_patrimonio, "nao")
+        self.assertEqual(ferramenta.patrimonio, "SEM_PATRIMONIO")
+
     def test_historico_e_registrado_ao_editar_ferramenta(self):
         ferramenta = Ferramenta.objects.create(
             codigo="DSAFM-0001",

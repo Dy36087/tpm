@@ -181,7 +181,13 @@
             <option value="COFEN">COFEN</option>
             <option value="CAESB">CAESB</option>
             <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)">VIAGEM (ESPECIFICAR NA DESCRIÇÃO)</option>
+            <option value="NOVO_LOCAL">Cadastrar local novo...</option>
           </select>
+        </div>
+
+        <div class="form-group" id="local_novo_group" style="display: none;">
+          <label for="local_novo">Novo Local</label>
+          <input type="text" id="local_novo" name="local_novo" maxlength="100" placeholder="Digite o nome do local" />
         </div>
 
         <div class="form-group">
@@ -220,6 +226,9 @@
         const possuiPatrimonio = document.getElementById('possui_patrimonio')
         const patrimonioDiv = document.getElementById('patrimonio_div')
         const patrimonioInput = document.getElementById('patrimonio')
+        const localSelect = document.getElementById('local')
+        const localNovoGroup = document.getElementById('local_novo_group')
+        const localNovoInput = document.getElementById('local_novo')
       
         function controlarPatrimonio() {
           if (possuiPatrimonio.value === 'nao') {
@@ -233,10 +242,20 @@
             }
           }
         }
+
+        function controlarLocal() {
+          const mostrarCampoNovoLocal = localSelect && localSelect.value === 'NOVO_LOCAL'
+          if (localNovoGroup) {
+            localNovoGroup.style.display = mostrarCampoNovoLocal ? 'block' : 'none'
+          }
+          if (localNovoInput && !mostrarCampoNovoLocal) {
+            localNovoInput.value = ''
+          }
+        }
       
         const uppercaseFields = document.querySelectorAll('input[type="text"], textarea')
         const selectFields = document.querySelectorAll('select')
-      
+
         uppercaseFields.forEach((field) => {
           field.addEventListener('input', function () {
             this.value = this.value.toUpperCase()
@@ -255,8 +274,12 @@
         })
       
         possuiPatrimonio.addEventListener('change', controlarPatrimonio)
+        if (localSelect) {
+          localSelect.addEventListener('change', controlarLocal)
+        }
       
         controlarPatrimonio()
+        controlarLocal()
       })
     </script>
   </body>

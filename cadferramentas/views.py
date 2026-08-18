@@ -198,31 +198,31 @@ def listar_ferramentas(request):
 @login_required
 def cadastrar_ferramenta(request):
     if request.method == "POST":
-        possui_patrimonio = request.POST.get("possui_patrimonio")
-        patrimonio = "SEM_PATRIMONIO"
-        categoria = ""
-        fabricante = ""
-        nome = ""
-        data_aquisicao = ""
-        estado = ""
-        local = ""
-        descricao = ""
+        possui_patrimonio = request.POST.get("possui_patrimonio", "sim").strip().lower()
+        patrimonio = request.POST.get("patrimonio", "").strip().upper()
+        categoria = request.POST.get("categoria", "").strip().upper()
+        fabricante = request.POST.get("fabricante", "").strip().upper()
+        nome = request.POST.get("nome", "").strip().upper()
+        data_aquisicao = request.POST.get("data_aquisicao", "").strip()
+        estado = request.POST.get("estado", "").strip().upper()
+        local = request.POST.get("local", "").strip().upper()
+        local_novo = request.POST.get("local_novo", "").strip().upper()
+        if local == "NOVO_LOCAL":
+            local = local_novo or "OUTRO"
+        descricao = request.POST.get("descricao", "").strip().upper()
         responsavel = None
 
-        if possui_patrimonio != "nao":
-            patrimonio = request.POST.get("patrimonio", "").strip().upper()
-            categoria = request.POST.get("categoria", "").strip().upper()
-            fabricante = request.POST.get("fabricante", "").strip().upper()
-            nome = request.POST.get("nome", "").strip().upper()
-            data_aquisicao = request.POST.get("data_aquisicao", "").strip().upper()
-            estado = request.POST.get("estado", "").strip().upper()
-            local = request.POST.get("local", "").strip().upper()
-            descricao = request.POST.get("descricao", "").strip().upper()
-            responsavel_id = request.POST.get("responsavel", "").strip()
-            if responsavel_id:
-                responsavel = Servidor.objects.filter(id=responsavel_id).first()
+        if possui_patrimonio == "nao":
+            patrimonio = "SEM_PATRIMONIO"
+        elif not patrimonio:
+            patrimonio = "SEM_PATRIMONIO"
+
+        responsavel_id = request.POST.get("responsavel", "").strip()
+        if responsavel_id:
+            responsavel = Servidor.objects.filter(id=responsavel_id).first()
 
         ferramenta = Ferramenta(
+            possui_patrimonio=possui_patrimonio,
             patrimonio=patrimonio,
             categoria=categoria,
             fabricante=fabricante,
@@ -249,6 +249,7 @@ def _normalizar_valor_historico(valor):
 
 def _registrar_historico_ferramenta(ferramenta, dados_novos, usuario):
     campos = [
+        "possui_patrimonio",
         "patrimonio",
         "categoria",
         "fabricante",
@@ -293,6 +294,7 @@ def editar_ferramenta(request, id):
         valores_anteriores = {
             campo: _normalizar_valor_historico(getattr(ferramenta, campo))
             for campo in [
+                "possui_patrimonio",
                 "patrimonio",
                 "categoria",
                 "fabricante",
@@ -305,20 +307,35 @@ def editar_ferramenta(request, id):
             ]
         }
 
+        possui_patrimonio = request.POST.get("possui_patrimonio", "sim").strip().lower()
+        patrimonio = request.POST.get("patrimonio", "").strip().upper()
+
+        if possui_patrimonio == "nao":
+            patrimonio = "SEM_PATRIMONIO"
+        elif not patrimonio:
+            patrimonio = "SEM_PATRIMONIO"
+
+        local = request.POST.get("local", "").strip().upper()
+        local_novo = request.POST.get("local_novo", "").strip().upper()
+        if local == "NOVO_LOCAL":
+            local = local_novo or "OUTRO"
+
         dados_novos = {
-            "patrimonio": request.POST.get("patrimonio", ""),
+            "possui_patrimonio": possui_patrimonio,
+            "patrimonio": patrimonio,
             "nome": request.POST.get("nome", ""),
             "categoria": request.POST.get("categoria", ""),
             "fabricante": request.POST.get("fabricante", ""),
             "data_aquisicao": request.POST.get("data_aquisicao") or None,
             "estado": request.POST.get("estado", ""),
-            "local": request.POST.get("local", ""),
+            "local": local,
             "descricao": request.POST.get("descricao", ""),
             "observacao": request.POST.get("observacao", ""),
         }
 
         _registrar_historico_ferramenta(ferramenta, dados_novos, request.user)
 
+        ferramenta.possui_patrimonio = dados_novos["possui_patrimonio"]
         ferramenta.patrimonio = dados_novos["patrimonio"]
         ferramenta.nome = dados_novos["nome"]
         ferramenta.categoria = dados_novos["categoria"]
@@ -333,4 +350,14 @@ def editar_ferramenta(request, id):
 
         return redirect("listar_ferramentas")
 
-    return render(request, "editferramenta.html", {"ferramenta": ferramenta})
+    local_custom = ferramenta.local not in [
+        "COFEN",
+        "CAESB",
+        "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)",
+    ]
+
+    return render(
+        request,
+        "editferramenta.html",
+        {"ferramenta": ferramenta, "local_custom": local_custom},
+    )

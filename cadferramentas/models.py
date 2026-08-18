@@ -32,7 +32,8 @@ class HistoricoAlteracaoFerramenta(models.Model):
 
 class Ferramenta(models.Model):
     codigo = models.CharField(max_length=16, unique=True, blank=True, default="")
-    patrimonio = models.CharField(max_length=100, blank=True)
+    possui_patrimonio = models.CharField(max_length=10, default="sim", blank=True)
+    patrimonio = models.CharField(max_length=100, blank=True, default="")
     categoria = models.CharField(max_length=50, blank=True)
     fabricante = models.CharField(max_length=100, blank=True)
     nome = models.CharField(max_length=100)

@@ -295,6 +295,29 @@
     <form method="post">
       {% csrf_token %}
 
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const localSelect = document.getElementById('local')
+          const localNovoGroup = document.getElementById('local_novo_group')
+          const localNovoInput = document.getElementById('local_novo')
+
+          function controlarLocal() {
+            const mostrarCampoNovoLocal = localSelect && localSelect.value === 'NOVO_LOCAL'
+            if (localNovoGroup) {
+              localNovoGroup.style.display = mostrarCampoNovoLocal ? 'block' : 'none'
+            }
+            if (localNovoInput && !mostrarCampoNovoLocal) {
+              localNovoInput.value = ''
+            }
+          }
+
+          if (localSelect) {
+            localSelect.addEventListener('change', controlarLocal)
+          }
+          controlarLocal()
+        })
+      </script>
+
       <label>Nome</label>
       <input type="text" name="nome" value="{{ ferramenta.nome }}" />
 
@@ -306,6 +329,19 @@
         </select>
       </div>
 
+      <div class="row">
+          <div class="form-group">
+            <label for="categoria">Categoria</label>
+            <select id="categoria" name="categoria">
+              <option value="MANUAL" {% if ferramenta.categoria == "MANUAL" %}selected{% endif %}>MANUAL</option>
+              <option value="ELÉTRICA" {% if ferramenta.categoria == "ELÉTRICA" %}selected{% endif %}>ELÉTRICA</option>
+              <option value="PNEUMÁTICA" {% if ferramenta.categoria == "PNEUMÁTICA" %}selected{% endif %}>PNEUMÁTICA</option>
+              <option value="MEDIÇÃO" {% if ferramenta.categoria == "MEDIÇÃO" %}selected{% endif %}>MEDIÇÃO</option>
+              <option value="OUTROS" {% if ferramenta.categoria == "OUTROS" %}selected{% endif %}>OUTROS</option>
+            </select>
+          </div>
+      </div>
+
       <label>Fabricante</label>
       <input type="text" name="fabricante" value="{{ ferramenta.fabricante }}" />
 
@@ -315,7 +351,13 @@
             <option value="COFEN" {% if ferramenta.local == "COFEN" %}selected{% endif %}>COFEN</option>
             <option value="CAESB" {% if ferramenta.local == "CAESB" %}selected{% endif %}>CAESB</option>
             <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" {% if ferramenta.local == "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" %}selected{% endif %}>VIAGEM (ESPECIFICAR NA DESCRIÇÃO)</option>
+            <option value="NOVO_LOCAL" {% if local_custom %}selected{% endif %}>Cadastrar local novo...</option>
           </select>
+      </div>
+
+      <div class="form-group" id="local_novo_group" style="display: none;">
+        <label for="local_novo">Novo Local</label>
+        <input type="text" id="local_novo" name="local_novo" maxlength="100" value="{% if local_custom %}{{ ferramenta.local }}{% endif %}" placeholder="Digite o nome do local" />
       </div>
 
       <div class="form-group">
