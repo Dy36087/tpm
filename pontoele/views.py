@@ -1,4 +1,6 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -52,24 +54,63 @@ def usersfaceptm(request):
 @csrf_exempt
 @login_required
 def cadastrar_face(request):
+    if request.method != "POST":
+        return JsonResponse(
+            {"sucesso": False, "erro": "Método não permitido."}, status=405
+        )
 
-    dados = json.loads(request.body)
+    try:
+        dados = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"sucesso": False, "erro": "Dados do cadastro inválidos."}, status=400
+        )
 
-    servidor = Servidor.objects.create(
-        matricula=gerar_matricula(),
-        nome=dados["nome"],
-        cpf=dados["cpf"],
-        rg=dados["rg"],
-        data_nascimento=dados["data_nascimento"],
-        email=dados["email"],
-        telefone=dados["telefone"],
-        cep=dados["cep"],
-        endereco=dados["endereco"],
-        bairro=dados["bairro"],
-        cidade=dados["cidade"],
-        uf=dados["uf"],
-        face_encoding=dados["face_encoding"],
-    )
+    campos_obrigatorios = [
+        "nome",
+        "cpf",
+        "rg",
+        "data_nascimento",
+        "email",
+        "telefone",
+        "cep",
+        "endereco",
+        "bairro",
+        "cidade",
+        "uf",
+    ]
+    campos_ausentes = [campo for campo in campos_obrigatorios if not dados.get(campo)]
+    if campos_ausentes:
+        return JsonResponse(
+            {"sucesso": False, "erro": "Preencha todos os campos obrigatórios."},
+            status=400,
+        )
+
+    try:
+        servidor = Servidor(
+            matricula=gerar_matricula(),
+            nome=dados["nome"],
+            cpf=dados["cpf"],
+            rg=dados["rg"],
+            data_nascimento=dados["data_nascimento"],
+            email=dados["email"],
+            telefone=dados["telefone"],
+            cep=dados["cep"],
+            endereco=dados["endereco"],
+            bairro=dados["bairro"],
+            cidade=dados["cidade"],
+            uf=dados["uf"],
+            face_encoding=dados.get("face_encoding"),
+        )
+        servidor.full_clean()
+        servidor.save()
+    except ValidationError as erro:
+        return JsonResponse({"sucesso": False, "erro": erro.message_dict}, status=400)
+    except IntegrityError:
+        return JsonResponse(
+            {"sucesso": False, "erro": "CPF ou matrícula já cadastrados."},
+            status=400,
+        )
 
     return JsonResponse({"sucesso": True, "matricula": servidor.matricula})
 

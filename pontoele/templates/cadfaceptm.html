@@ -54,6 +54,25 @@
         padding: 10px;
         margin-bottom: 10px;
       }
+
+      #opcoesCadastro {
+        display: flex;
+        gap: 10px;
+      }
+
+      #opcoesCadastro button {
+        width: auto;
+        flex: 1;
+      }
+
+      #formularioCadastro {
+        display: none;
+      }
+
+      #cameraContainer,
+      #instrucao {
+        display: none;
+      }
       
       @media (max-width: 768px) {
         .container {
@@ -78,12 +97,19 @@
     <div class="container">
       <h2>Cadastro Biométrico Facial</h2>
 
+      <div id="opcoesCadastro">
+        <button type="button" onclick="selecionarModoCadastro('facial')">Reconhecimento facial</button>
+        <button type="button" onclick="selecionarModoCadastro('dados')">Somente inclusão de dados</button>
+      </div>
+
+      <div id="formularioCadastro">
       <input type="text" id="nome" placeholder="Nome Completo" />
 
       <input type="text" id="cpf" placeholder="CPF" />
 
       <input type="text" id="rg" placeholder="RG" />
-
+      
+      <label for="data_nascimento">Data de Nascimento</label>
       <input type="date" id="data_nascimento" />
 
       <input type="email" id="email" placeholder="E-mail" />
@@ -108,11 +134,13 @@
 
       <p id="instrucao">Posicione seu rosto dentro do oval verde</p>
 
-      <button type="button" onclick="enviarCadastro()">Cadastrar Face</button>
+      <button type="button" id="botaoCadastro" onclick="enviarCadastro()">Cadastrar</button>
+      </div>
     </div>
 
     <script>
       const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights'
+      let modoCadastro = null
       
       async function carregarModelos() {
         await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)])
@@ -158,10 +186,14 @@
         if (!nome) {
           return alert('Informe o nome do servidor.')
         }
-      
-        const resultadoDeteccao = await detectarFace()
-        if (!resultadoDeteccao.ok) {
-          return alert('Rosto não detectado. Ajuste o posicionamento e tente novamente.')
+
+        let faceEncoding = null
+        if (modoCadastro === 'facial') {
+          const resultadoDeteccao = await detectarFace()
+          if (!resultadoDeteccao.ok) {
+            return alert('Rosto não detectado. Ajuste o posicionamento e tente novamente.')
+          }
+          faceEncoding = resultadoDeteccao.faceEncoding
         }
       
         try {
@@ -193,16 +225,22 @@
       
               uf: document.getElementById('uf').value,
       
-              face_encoding: resultadoDeteccao.faceEncoding
+              face_encoding: faceEncoding
             })
           })
       
+          const tipoConteudo = resposta.headers.get('content-type') || ''
+          if (!tipoConteudo.includes('application/json')) {
+            throw new Error('O servidor retornou uma resposta inválida. Atualize a página e tente novamente.')
+          }
+
           const dados = await resposta.json()
       
-          if (dados.sucesso) {
-            alert('Rosto cadastrado com sucesso! Matrícula: ' + dados.matricula)
+          if (resposta.ok && dados.sucesso) {
+            alert('Cadastro realizado com sucesso! Matrícula: ' + dados.matricula)
           } else {
-            alert('Erro ao salvar no banco: ' + (dados.erro || 'Erro desconhecido'))
+            const erro = typeof dados.erro === 'object' ? Object.values(dados.erro).flat().join(' ') : dados.erro
+            alert('Erro ao salvar no banco: ' + (erro || 'Erro desconhecido'))
           }
         } catch (erro) {
           console.error(erro)
@@ -210,12 +248,24 @@
         }
       }
       
-      window.onload = async function () {
+      async function selecionarModoCadastro(modo) {
+        modoCadastro = modo
+        document.getElementById('opcoesCadastro').style.display = 'none'
+        document.getElementById('formularioCadastro').style.display = 'block'
+
+        if (modo === 'dados') {
+          document.getElementById('botaoCadastro').textContent = 'Cadastrar dados'
+          return
+        }
+
+        document.getElementById('cameraContainer').style.display = 'block'
+        document.getElementById('instrucao').style.display = 'block'
+        document.getElementById('botaoCadastro').textContent = 'Cadastrar Face'
+
         try {
           await carregarModelos()
           await iniciarCamera()
           monitorarFace()
-          alert('Sistema iniciado com sucesso.')
         } catch (erro) {
           console.error(erro)
           alert('Erro ao iniciar sistema:\n' + erro.message)
