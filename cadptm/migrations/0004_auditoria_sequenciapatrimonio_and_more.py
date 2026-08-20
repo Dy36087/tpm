@@ -7,54 +7,92 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cadptm', '0003_delete_item_alter_patrimonio_tipo'),
+        ("cadptm", "0003_delete_item_alter_patrimonio_tipo"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Auditoria',
+            name="Auditoria",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('usuario', models.CharField(max_length=100)),
-                ('acao', models.CharField(max_length=100)),
-                ('tabela', models.CharField(max_length=100)),
-                ('registro_id', models.IntegerField()),
-                ('data', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("usuario", models.CharField(max_length=100)),
+                ("acao", models.CharField(max_length=100)),
+                ("tabela", models.CharField(max_length=100)),
+                ("registro_id", models.IntegerField()),
+                ("data", models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='SequenciaPatrimonio',
+            name="SequenciaPatrimonio",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ano', models.IntegerField(unique=True)),
-                ('ultimo_numero', models.IntegerField(default=0)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("ano", models.IntegerField(unique=True)),
+                ("ultimo_numero", models.IntegerField(default=0)),
             ],
         ),
         migrations.AddField(
-            model_name='patrimonio',
-            name='codigo_barras',
-            field=models.ImageField(blank=True, null=True, upload_to='codigos/'),
+            model_name="patrimonio",
+            name="codigo_barras",
+            field=models.ImageField(blank=True, null=True, upload_to="codigos/"),
         ),
         migrations.AlterField(
-            model_name='patrimonio',
-            name='destino',
-            field=models.CharField(choices=[('estoque', 'Estoque'), ('usando', 'Em Uso'), ('manutencao', 'Manutenção'), ('baixado', 'Baixado')], max_length=100),
+            model_name="patrimonio",
+            name="destino",
+            field=models.CharField(
+                choices=[
+                    ("estoque", "Estoque"),
+                    ("usando", "Em Uso"),
+                    ("manutencao", "Manutenção"),
+                    ("baixado", "Baixado"),
+                ],
+                max_length=100,
+            ),
         ),
         migrations.AlterField(
-            model_name='patrimonio',
-            name='status',
+            model_name="patrimonio",
+            name="status",
             field=models.CharField(max_length=20),
         ),
         migrations.CreateModel(
-            name='Movimentacao',
+            name="Movimentacao",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('data', models.DateTimeField(auto_now_add=True)),
-                ('origem', models.CharField(max_length=100)),
-                ('destino', models.CharField(max_length=100)),
-                ('responsavel', models.CharField(max_length=100)),
-                ('observacao', models.TextField(blank=True)),
-                ('patrimonio', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cadptm.patrimonio')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("data", models.DateTimeField(auto_now_add=True)),
+                ("origem", models.CharField(max_length=100)),
+                ("destino", models.CharField(max_length=100)),
+                ("responsavel", models.CharField(max_length=100)),
+                ("observacao", models.TextField(blank=True)),
+                (
+                    "patrimonio",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="cadptm.patrimonio",
+                    ),
+                ),
             ],
         ),
     ]

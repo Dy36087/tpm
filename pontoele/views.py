@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import RegistroPonto, Servidor
@@ -48,7 +48,7 @@ def pontoeleptm(request):
 @login_required
 def usersfaceptm(request):
     servidores = Servidor.objects.all()
-    return render(request, "usersfaceptm.html", {"servidores": servidores})
+    return render(request, "ptmcolaboradores.html", {"servidores": servidores})
 
 
 @csrf_exempt
@@ -86,6 +86,15 @@ def cadastrar_face(request):
             status=400,
         )
 
+    cep_numerico = "".join(
+        caractere for caractere in dados["cep"] if caractere.isdigit()
+    )
+    if len(cep_numerico) != 8:
+        return JsonResponse(
+            {"sucesso": False, "erro": "Informe um CEP com 8 dígitos."},
+            status=400,
+        )
+
     try:
         servidor = Servidor(
             matricula=gerar_matricula(),
@@ -95,7 +104,7 @@ def cadastrar_face(request):
             data_nascimento=dados["data_nascimento"],
             email=dados["email"],
             telefone=dados["telefone"],
-            cep=dados["cep"],
+            cep=f"{cep_numerico[:5]}-{cep_numerico[5:]}",
             endereco=dados["endereco"],
             bairro=dados["bairro"],
             cidade=dados["cidade"],
@@ -238,6 +247,47 @@ def listar_servidores(request):
 
     return render(
         request,
-        "listar_servidores.html",
+        "ptmcolaboradores.html",
         {"servidores": servidores, "pesquisa": pesquisa},
     )
+
+
+@login_required
+def editar_servidor(request, servidor_id):
+    servidor = get_object_or_404(Servidor, id=servidor_id)
+    if request.method == "POST":
+        for campo in [
+            "nome",
+            "cpf",
+            "rg",
+            "data_nascimento",
+            "email",
+            "telefone",
+            "cep",
+            "endereco",
+            "bairro",
+            "cidade",
+            "uf",
+        ]:
+            setattr(servidor, campo, request.POST.get(campo, "").strip())
+
+        cep_numerico = "".join(
+            caractere for caractere in servidor.cep if caractere.isdigit()
+        )
+        if len(cep_numerico) == 8:
+            servidor.cep = f"{cep_numerico[:5]}-{cep_numerico[5:]}"
+        try:
+            servidor.full_clean()
+            servidor.save()
+        except ValidationError:
+            pass
+
+    return redirect("listar_servidores")
+
+
+@login_required
+def excluir_servidor(request, servidor_id):
+    if request.method == "POST":
+        get_object_or_404(Servidor, id=servidor_id).delete()
+
+    return redirect("listar_servidores")

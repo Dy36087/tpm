@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cadferramentas', '0003_historicoalteracaoferramenta'),
+        ("cadferramentas", "0003_historicoalteracaoferramenta"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ferramenta',
-            name='possui_patrimonio',
-            field=models.CharField(blank=True, default='sim', max_length=10),
+            model_name="ferramenta",
+            name="possui_patrimonio",
+            field=models.CharField(blank=True, default="sim", max_length=10),
         ),
         migrations.AlterField(
-            model_name='ferramenta',
-            name='patrimonio',
-            field=models.CharField(blank=True, default='', max_length=100),
+            model_name="ferramenta",
+            name="patrimonio",
+            field=models.CharField(blank=True, default="", max_length=100),
         ),
     ]

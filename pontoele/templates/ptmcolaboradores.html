@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Colaboradores</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}" />
+    <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
+    <style>
+      body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 30px; }
+      .container { max-width: 1200px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, .1); }
+      .topo { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+      .topo img { height: 80px; }
+      h2 { color: #333; margin: 0; }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; min-width: 850px; }
+      th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+      th { background: #0078d4; color: #fff; }
+      .acoes { display: flex; gap: 8px; }
+      button { border: 0; border-radius: 4px; padding: 8px 12px; color: #fff; cursor: pointer; }
+      .editar { background: #0078d4; }
+      .excluir { background: #c62828; }
+      dialog { border: 0; border-radius: 8px; width: min(620px, calc(100% - 32px)); padding: 24px; }
+      dialog::backdrop { background: rgba(0, 0, 0, .45); }
+      .campos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      label { display: block; font-weight: bold; margin-bottom: 4px; }
+      input { box-sizing: border-box; width: 100%; padding: 9px; border: 1px solid #bbb; border-radius: 4px; }
+      .modal-acoes { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+      .cancelar { background: #666; }
+      @media (max-width: 650px) { body { padding: 12px; } .container { padding: 16px; } .campos { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    {% include 'partials/user_status.html' %}
+    <main class="container">
+      <div class="topo"><img src="{% static 'principal/img/logo.png' %}" alt="Logo" /><h2>Colaboradores Cadastrados</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Matrícula</th><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Cidade/UF</th><th>Ações</th></tr></thead>
+          <tbody>
+            {% for servidor in servidores %}
+              <tr>
+                <td>{{ servidor.matricula }}</td><td>{{ servidor.nome }}</td><td>{{ servidor.cpf }}</td><td>{{ servidor.email }}</td><td>{{ servidor.telefone }}</td><td>{{ servidor.cidade }}/{{ servidor.uf }}</td>
+                <td class="acoes">
+                  <button class="editar" type="button" data-servidor='{"id":"{{ servidor.id }}","nome":"{{ servidor.nome|escapejs }}","cpf":"{{ servidor.cpf|escapejs }}","rg":"{{ servidor.rg|escapejs }}","data_nascimento":"{{ servidor.data_nascimento|date:'Y-m-d' }}","email":"{{ servidor.email|escapejs }}","telefone":"{{ servidor.telefone|escapejs }}","cep":"{{ servidor.cep|escapejs }}","endereco":"{{ servidor.endereco|escapejs }}","bairro":"{{ servidor.bairro|escapejs }}","cidade":"{{ servidor.cidade|escapejs }}","uf":"{{ servidor.uf|escapejs }}"}'>Alterar</button>
+                  <form method="post" action="{% url 'excluir_servidor' servidor.id %}" onsubmit="return confirm('Excluir este colaborador?')">{% csrf_token %}<button class="excluir" type="submit">Excluir</button></form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="7">Nenhum colaborador cadastrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+    <dialog id="modalEdicao">
+      <form id="formEdicao" method="post">
+        {% csrf_token %}
+        <h2>Alterar Colaborador</h2>
+        <div class="campos">
+          <div><label for="nome">Nome</label><input id="nome" name="nome" required /></div>
+          <div><label for="cpf">CPF</label><input id="cpf" name="cpf" required /></div>
+          <div><label for="rg">RG</label><input id="rg" name="rg" required /></div>
+          <div><label for="data_nascimento">Nascimento</label><input id="data_nascimento" type="date" name="data_nascimento" required /></div>
+          <div><label for="email">E-mail</label><input id="email" type="email" name="email" required /></div>
+          <div><label for="telefone">Telefone</label><input id="telefone" name="telefone" required /></div>
+          <div><label for="cep">CEP</label><input id="cep" name="cep" required /></div>
+          <div><label for="endereco">Endereço</label><input id="endereco" name="endereco" required /></div>
+          <div><label for="bairro">Bairro</label><input id="bairro" name="bairro" required /></div>
+          <div><label for="cidade">Cidade</label><input id="cidade" name="cidade" required /></div>
+          <div><label for="uf">UF</label><input id="uf" name="uf" maxlength="2" required /></div>
+        </div>
+        <div class="modal-acoes"><button class="cancelar" type="button" id="cancelarEdicao">Cancelar</button><button class="editar" type="submit">Salvar</button></div>
+      </form>
+    </dialog>
+      <section>
+      <div class="button-row">
+          <a href="/ptmdsa/cadptm/" class="btn-primary">Ir para Cadastro de Patrimônio</a>
+          <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary">Pesquisa Patrimonio</a>
+          <a href="/ptmdsa/cadferramentas/" class="btn-primary">Cadastro de Ferramentas</a>
+          <a href="/ptmdsa/cadferramentas/listar_ferramentas/" class="btn-primary">Pesquisa Ferramentas</a>
+          <a href="/ptmdsa/pontoeleptm/cadfaceptm/" class="btn-primary">Cadastro de Ponto Eletronico</a>
+          <a href="/ptmdsa/pontoeleptm/usersfaceptm/" class="btn-primary">Pesquisa De Colaboradores</a>
+        </div>
+    </section>   
+    <script>
+      const modal = document.getElementById('modalEdicao')
+      const formEdicao = document.getElementById('formEdicao')
+      document.querySelectorAll('[data-servidor]').forEach((botao) => {
+        botao.addEventListener('click', () => {
+          const servidor = JSON.parse(botao.dataset.servidor)
+          formEdicao.action = `/ptmdsa/pontoeleptm/servidores/${servidor.id}/editar/`
+          Object.entries(servidor).forEach(([campo, valor]) => { const input = formEdicao.elements[campo]; if (input) input.value = valor })
+          modal.showModal()
+        })
+      })
+      document.getElementById('cancelarEdicao').addEventListener('click', () => modal.close())
+    </script>
+  </body>
+</html>

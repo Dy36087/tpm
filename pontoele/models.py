@@ -33,6 +33,9 @@ class Servidor(models.Model):
 
     data_cadastro = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = "pontoele_servidor"
+
     def __str__(self):
 
         return f"{self.matricula} - " f"{self.nome}"

@@ -6,58 +6,58 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pontoele', '0004_servidor_bairro_servidor_cep_servidor_cidade_and_more'),
+        ("pontoele", "0004_servidor_bairro_servidor_cep_servidor_cidade_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='servidor',
-            name='bairro',
+            model_name="servidor",
+            name="bairro",
             field=models.CharField(max_length=100),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='cep',
+            model_name="servidor",
+            name="cep",
             field=models.CharField(max_length=9),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='cidade',
+            model_name="servidor",
+            name="cidade",
             field=models.CharField(max_length=100),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='cpf',
+            model_name="servidor",
+            name="cpf",
             field=models.CharField(max_length=14, unique=True),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='data_nascimento',
+            model_name="servidor",
+            name="data_nascimento",
             field=models.DateField(),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='email',
+            model_name="servidor",
+            name="email",
             field=models.EmailField(max_length=254),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='endereco',
+            model_name="servidor",
+            name="endereco",
             field=models.CharField(max_length=300),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='rg',
+            model_name="servidor",
+            name="rg",
             field=models.CharField(max_length=20),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='telefone',
+            model_name="servidor",
+            name="telefone",
             field=models.CharField(max_length=20),
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='uf',
+            model_name="servidor",
+            name="uf",
             field=models.CharField(max_length=2),
         ),
     ]

@@ -8,28 +8,60 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Servidor',
+            name="Servidor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nome', models.CharField(max_length=200)),
-                ('matricula', models.CharField(max_length=30, unique=True)),
-                ('foto_referencia', models.ImageField(upload_to='faces/')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("nome", models.CharField(max_length=200)),
+                ("matricula", models.CharField(max_length=30, unique=True)),
+                ("foto_referencia", models.ImageField(upload_to="faces/")),
             ],
         ),
         migrations.CreateModel(
-            name='RegistroPonto',
+            name="RegistroPonto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tipo', models.CharField(choices=[('entrada', 'Entrada Trabalho'), ('saida_pausa', 'Saída Pausa'), ('retorno_pausa', 'Retorno Pausa'), ('saida', 'Saída Trabalho')], max_length=20)),
-                ('data_hora', models.DateTimeField(auto_now_add=True)),
-                ('latitude', models.FloatField()),
-                ('longitude', models.FloatField()),
-                ('servidor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pontoele.servidor')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "tipo",
+                    models.CharField(
+                        choices=[
+                            ("entrada", "Entrada Trabalho"),
+                            ("saida_pausa", "Saída Pausa"),
+                            ("retorno_pausa", "Retorno Pausa"),
+                            ("saida", "Saída Trabalho"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("data_hora", models.DateTimeField(auto_now_add=True)),
+                ("latitude", models.FloatField()),
+                ("longitude", models.FloatField()),
+                (
+                    "servidor",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="pontoele.servidor",
+                    ),
+                ),
             ],
         ),
     ]

@@ -9,23 +9,47 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('cadptm', '0007_auditoria'),
+        ("cadptm", "0007_auditoria"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='HistoricoAlteracaoPatrimonio',
+            name="HistoricoAlteracaoPatrimonio",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('campo', models.CharField(max_length=100)),
-                ('valor_anterior', models.TextField(blank=True, null=True)),
-                ('valor_novo', models.TextField(blank=True, null=True)),
-                ('data_hora', models.DateTimeField(auto_now_add=True)),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='historicos', to='cadptm.patrimonio')),
-                ('usuario', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='historicos_patrimonio', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("campo", models.CharField(max_length=100)),
+                ("valor_anterior", models.TextField(blank=True, null=True)),
+                ("valor_novo", models.TextField(blank=True, null=True)),
+                ("data_hora", models.DateTimeField(auto_now_add=True)),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="historicos",
+                        to="cadptm.patrimonio",
+                    ),
+                ),
+                (
+                    "usuario",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="historicos_patrimonio",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-data_hora'],
+                "ordering": ["-data_hora"],
             },
         ),
     ]

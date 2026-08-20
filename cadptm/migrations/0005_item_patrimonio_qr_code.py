@@ -6,25 +6,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cadptm', '0004_auditoria_sequenciapatrimonio_and_more'),
+        ("cadptm", "0004_auditoria_sequenciapatrimonio_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Item',
+            name="Item",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('controle', models.CharField(max_length=100)),
-                ('patrimonio', models.CharField(max_length=100)),
-                ('tipo', models.CharField(max_length=100)),
-                ('material', models.CharField(max_length=100)),
-                ('localizacao', models.CharField(max_length=100)),
-                ('status', models.CharField(max_length=50)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("controle", models.CharField(max_length=100)),
+                ("patrimonio", models.CharField(max_length=100)),
+                ("tipo", models.CharField(max_length=100)),
+                ("material", models.CharField(max_length=100)),
+                ("localizacao", models.CharField(max_length=100)),
+                ("status", models.CharField(max_length=50)),
             ],
         ),
         migrations.AddField(
-            model_name='patrimonio',
-            name='qr_code',
-            field=models.ImageField(blank=True, null=True, upload_to='qrcodes/'),
+            model_name="patrimonio",
+            name="qr_code",
+            field=models.ImageField(blank=True, null=True, upload_to="qrcodes/"),
         ),
     ]

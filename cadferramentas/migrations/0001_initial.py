@@ -7,24 +7,36 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Ferramenta',
+            name="Ferramenta",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('codigo', models.CharField(blank=True, default='', max_length=16, unique=True)),
-                ('patrimonio', models.CharField(blank=True, max_length=100)),
-                ('categoria', models.CharField(blank=True, max_length=50)),
-                ('fabricante', models.CharField(blank=True, max_length=100)),
-                ('nome', models.CharField(max_length=100)),
-                ('data_aquisicao', models.DateField(blank=True, null=True)),
-                ('estado', models.CharField(blank=True, max_length=50)),
-                ('local', models.CharField(blank=True, max_length=100)),
-                ('descricao', models.TextField(blank=True, null=True)),
-                ('observacao', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "codigo",
+                    models.CharField(
+                        blank=True, default="", max_length=16, unique=True
+                    ),
+                ),
+                ("patrimonio", models.CharField(blank=True, max_length=100)),
+                ("categoria", models.CharField(blank=True, max_length=50)),
+                ("fabricante", models.CharField(blank=True, max_length=100)),
+                ("nome", models.CharField(max_length=100)),
+                ("data_aquisicao", models.DateField(blank=True, null=True)),
+                ("estado", models.CharField(blank=True, max_length=50)),
+                ("local", models.CharField(blank=True, max_length=100)),
+                ("descricao", models.TextField(blank=True, null=True)),
+                ("observacao", models.TextField(blank=True, null=True)),
             ],
         ),
     ]

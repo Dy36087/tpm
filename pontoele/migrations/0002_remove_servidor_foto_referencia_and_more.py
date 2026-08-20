@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pontoele', '0001_initial'),
+        ("pontoele", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='servidor',
-            name='foto_referencia',
+            model_name="servidor",
+            name="foto_referencia",
         ),
         migrations.AddField(
-            model_name='servidor',
-            name='face_encoding',
+            model_name="servidor",
+            name="face_encoding",
             field=models.JSONField(default=1),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='servidor',
-            name='matricula',
+            model_name="servidor",
+            name="matricula",
             field=models.CharField(max_length=8, unique=True),
         ),
     ]

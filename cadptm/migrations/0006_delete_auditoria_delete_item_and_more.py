@@ -6,36 +6,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cadptm', '0005_item_patrimonio_qr_code'),
+        ("cadptm", "0005_item_patrimonio_qr_code"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='Auditoria',
+            name="Auditoria",
         ),
         migrations.DeleteModel(
-            name='Item',
+            name="Item",
         ),
         migrations.RemoveField(
-            model_name='patrimonio',
-            name='codigo_barras',
+            model_name="patrimonio",
+            name="codigo_barras",
         ),
         migrations.AlterField(
-            model_name='patrimonio',
-            name='destino',
+            model_name="patrimonio",
+            name="destino",
             field=models.CharField(max_length=100),
         ),
         migrations.AlterField(
-            model_name='patrimonio',
-            name='estado_conservacao',
+            model_name="patrimonio",
+            name="estado_conservacao",
             field=models.CharField(max_length=20),
         ),
         migrations.AlterField(
-            model_name='patrimonio',
-            name='tipo',
+            model_name="patrimonio",
+            name="tipo",
             field=models.CharField(max_length=100),
         ),
         migrations.DeleteModel(
-            name='Movimentacao',
+            name="Movimentacao",
         ),
     ]

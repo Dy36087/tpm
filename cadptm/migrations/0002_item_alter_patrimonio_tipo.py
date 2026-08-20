@@ -6,25 +6,39 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cadptm', '0001_initial'),
+        ("cadptm", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Item',
+            name="Item",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('controle', models.CharField(max_length=100)),
-                ('patrimonio', models.CharField(max_length=100)),
-                ('tipo', models.CharField(max_length=100)),
-                ('material', models.CharField(max_length=100)),
-                ('localizacao', models.CharField(max_length=100)),
-                ('status', models.CharField(max_length=50)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("controle", models.CharField(max_length=100)),
+                ("patrimonio", models.CharField(max_length=100)),
+                ("tipo", models.CharField(max_length=100)),
+                ("material", models.CharField(max_length=100)),
+                ("localizacao", models.CharField(max_length=100)),
+                ("status", models.CharField(max_length=50)),
             ],
         ),
         migrations.AlterField(
-            model_name='patrimonio',
-            name='tipo',
-            field=models.CharField(choices=[('proprio', 'Proprio'), ('terceiro', 'Terceiro (Locado, Cedido, etc.)')], max_length=100),
+            model_name="patrimonio",
+            name="tipo",
+            field=models.CharField(
+                choices=[
+                    ("proprio", "Proprio"),
+                    ("terceiro", "Terceiro (Locado, Cedido, etc.)"),
+                ],
+                max_length=100,
+            ),
         ),
     ]

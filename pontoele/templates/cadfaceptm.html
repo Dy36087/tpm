@@ -116,7 +116,7 @@
 
       <input type="text" id="telefone" placeholder="Telefone" />
 
-      <input type="text" id="cep" placeholder="CEP" />
+      <input type="text" id="cep" placeholder="CEP" inputmode="numeric" maxlength="9" />
 
       <input type="text" id="endereco" placeholder="Endereço" />
 
@@ -141,6 +141,8 @@
     <script>
       const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights'
       let modoCadastro = null
+      let cameraStream = null
+      let monitoramentoFace = null
       
       async function carregarModelos() {
         await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)])
@@ -150,6 +152,7 @@
       async function iniciarCamera() {
         const video = document.getElementById('camera')
         const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+        cameraStream = stream
         video.srcObject = stream
         return new Promise((resolve) => {
           video.onloadedmetadata = () => {
@@ -178,7 +181,29 @@
       }
       
       function monitorarFace() {
-        setInterval(detectarFace, 500)
+        monitoramentoFace = setInterval(detectarFace, 500)
+      }
+
+      function prepararNovoCadastro() {
+        document.getElementById('formularioCadastro').querySelectorAll('input').forEach((campo) => {
+          campo.value = ''
+        })
+        document.getElementById('cameraContainer').style.display = 'none'
+        document.getElementById('instrucao').style.display = 'none'
+        document.getElementById('instrucao').textContent = 'Posicione seu rosto dentro do oval verde'
+        document.getElementById('formularioCadastro').style.display = 'none'
+        document.getElementById('opcoesCadastro').style.display = 'flex'
+        document.getElementById('camera').srcObject = null
+
+        if (monitoramentoFace) {
+          clearInterval(monitoramentoFace)
+          monitoramentoFace = null
+        }
+        if (cameraStream) {
+          cameraStream.getTracks().forEach((track) => track.stop())
+          cameraStream = null
+        }
+        modoCadastro = null
       }
       
       async function enviarCadastro() {
@@ -238,6 +263,7 @@
       
           if (resposta.ok && dados.sucesso) {
             alert('Cadastro realizado com sucesso! Matrícula: ' + dados.matricula)
+            prepararNovoCadastro()
           } else {
             const erro = typeof dados.erro === 'object' ? Object.values(dados.erro).flat().join(' ') : dados.erro
             alert('Erro ao salvar no banco: ' + (erro || 'Erro desconhecido'))

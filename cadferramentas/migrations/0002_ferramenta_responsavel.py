@@ -7,14 +7,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cadferramentas', '0001_initial'),
-        ('pontoele', '0005_alter_servidor_bairro_alter_servidor_cep_and_more'),
+        ("cadferramentas", "0001_initial"),
+        ("pontoele", "0005_alter_servidor_bairro_alter_servidor_cep_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ferramenta',
-            name='responsavel',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='ferramenta', to='pontoele.servidor'),
+            model_name="ferramenta",
+            name="responsavel",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="ferramenta",
+                to="pontoele.servidor",
+            ),
         ),
     ]

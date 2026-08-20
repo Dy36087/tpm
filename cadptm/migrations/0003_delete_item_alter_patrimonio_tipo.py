@@ -6,16 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cadptm', '0002_item_alter_patrimonio_tipo'),
+        ("cadptm", "0002_item_alter_patrimonio_tipo"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='Item',
+            name="Item",
         ),
         migrations.AlterField(
-            model_name='patrimonio',
-            name='tipo',
-            field=models.CharField(choices=[('proprio', 'Proprio'), ('terceiro', 'Terceiro')], max_length=100),
+            model_name="patrimonio",
+            name="tipo",
+            field=models.CharField(
+                choices=[("proprio", "Proprio"), ("terceiro", "Terceiro")],
+                max_length=100,
+            ),
         ),
     ]

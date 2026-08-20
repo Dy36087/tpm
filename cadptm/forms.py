@@ -20,7 +20,7 @@ class PatrimonioForm(forms.ModelForm):
         choices=Patrimonio.TIPO,
         widget=forms.Select(attrs={"class": "form-control"}),
     )
-    
+
     destino = forms.ChoiceField(
         label="Destino",
         choices=Patrimonio.DESTINO_CHOICES,

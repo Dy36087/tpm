@@ -7,28 +7,64 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Patrimonio',
+            name="Patrimonio",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('controle', models.CharField(editable=False, max_length=50, unique=True)),
-                ('patrimonio', models.CharField(editable=False, max_length=50, unique=True)),
-                ('tipo', models.CharField(max_length=100)),
-                ('codigo', models.CharField(max_length=100)),
-                ('material', models.CharField(max_length=100)),
-                ('destino', models.CharField(max_length=100)),
-                ('estado_conservacao', models.CharField(choices=[('novo', 'Novo'), ('usado', 'Usado'), ('ruim', 'Ruim'), ('defeito', 'Defeito'), ('velho', 'Velho')], max_length=20)),
-                ('quantidade', models.CharField(max_length=100)),
-                ('valor', models.CharField(max_length=100)),
-                ('data_aquisicao', models.DateField()),
-                ('localizacao', models.CharField(max_length=100)),
-                ('status', models.CharField(choices=[('ativo', 'Ativo'), ('baixa', 'Baixa'), ('emprestimo', 'Empréstimo'), ('transferencia', 'Transferência')], max_length=20)),
-                ('criado_em', models.DateTimeField(auto_now_add=True)),
-                ('atualizado_em', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "controle",
+                    models.CharField(editable=False, max_length=50, unique=True),
+                ),
+                (
+                    "patrimonio",
+                    models.CharField(editable=False, max_length=50, unique=True),
+                ),
+                ("tipo", models.CharField(max_length=100)),
+                ("codigo", models.CharField(max_length=100)),
+                ("material", models.CharField(max_length=100)),
+                ("destino", models.CharField(max_length=100)),
+                (
+                    "estado_conservacao",
+                    models.CharField(
+                        choices=[
+                            ("novo", "Novo"),
+                            ("usado", "Usado"),
+                            ("ruim", "Ruim"),
+                            ("defeito", "Defeito"),
+                            ("velho", "Velho"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("quantidade", models.CharField(max_length=100)),
+                ("valor", models.CharField(max_length=100)),
+                ("data_aquisicao", models.DateField()),
+                ("localizacao", models.CharField(max_length=100)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("ativo", "Ativo"),
+                            ("baixa", "Baixa"),
+                            ("emprestimo", "Empréstimo"),
+                            ("transferencia", "Transferência"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("criado_em", models.DateTimeField(auto_now_add=True)),
+                ("atualizado_em", models.DateTimeField(auto_now=True)),
             ],
         ),
     ]
