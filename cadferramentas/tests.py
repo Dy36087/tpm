@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, SimpleTestCase, TestCase
 
 from .models import Ferramenta
+from principal.access import grupos_de_acesso
 
 
 class ViewsImportTests(SimpleTestCase):
@@ -19,6 +20,7 @@ class HistoricoFerramentaTest(TestCase):
             email="ferramenta_hist@example.com",
             password="admin123",
         )
+        self.user.groups.add(grupos_de_acesso()["Ferramentas"])
 
     def test_cadastrar_ferramenta_salva_possui_patrimonio(self):
         client = Client()
@@ -80,3 +82,22 @@ class HistoricoFerramentaTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(ferramenta.historicos.exists())
         self.assertIn("nome", [h.campo for h in ferramenta.historicos.all()])
+
+    def test_excluir_ferramenta_remove_registro(self):
+        ferramenta = Ferramenta.objects.create(
+            codigo="DSAFM-0002",
+            patrimonio="SEM_PATRIMONIO",
+            categoria="MANUAL",
+            fabricante="ACME",
+            nome="Furadeira",
+            estado="NOVO",
+            local="COFEN",
+        )
+
+        client = Client()
+        client.force_login(self.user)
+
+        response = client.post(f"/ptmdsa/cadferramentas/excluir/{ferramenta.id}/")
+
+        self.assertRedirects(response, "/ptmdsa/cadferramentas/listar_ferramentas/")
+        self.assertFalse(Ferramenta.objects.filter(id=ferramenta.id).exists())

@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.db.models import Count
 from principal.access import nivel_acesso
+from django.views.decorators.http import require_POST
 
 try:
     from openpyxl import Workbook
@@ -362,3 +363,11 @@ def editar_ferramenta(request, id):
         "editferramenta.html",
         {"ferramenta": ferramenta, "local_custom": local_custom},
     )
+
+
+@nivel_acesso("ferramentas")
+@require_POST
+def excluir_ferramenta(request, id):
+    ferramenta = get_object_or_404(Ferramenta, id=id)
+    ferramenta.delete()
+    return redirect("listar_ferramentas")
