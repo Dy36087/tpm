@@ -1,0 +1,256 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastrar Usuário de Acesso</title>
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="{% static 'principal/img/logo.png' %}"
+    />
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
+    <style>
+      body {
+        min-height: 100vh;
+        margin: 0;
+        padding: 32px 16px;
+        box-sizing: border-box;
+        background: #f4f6f9;
+        color: #263238;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        width: min(520px, 100%);
+        margin: 40px auto;
+        padding: 28px;
+        box-sizing: border-box;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.12);
+      }
+
+      .topo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .topo img {
+        width: 64px;
+        height: auto;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.55rem;
+        color: #1f2933;
+      }
+      .descricao {
+        margin: 0 0 22px;
+        color: #607d8b;
+      }
+      .campo {
+        margin-bottom: 17px;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: bold;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 11px;
+        border: 1px solid #b0bec5;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+      input:focus {
+        outline: 2px solid #90caf9;
+        border-color: #1976d2;
+      }
+      .ajuda {
+        margin: 6px 0 0;
+        color: #607d8b;
+        font-size: 0.88rem;
+      }
+      .erro {
+        margin: 6px 0 0;
+        color: #b3261e;
+        font-size: 0.9rem;
+      }
+      .mensagem {
+        margin-bottom: 18px;
+        padding: 11px;
+        border-radius: 4px;
+        background: #e8f5e9;
+        color: #1b5e20;
+      }
+      .usuarios {
+        margin-top: 34px;
+        border-top: 1px solid #d9e0e3;
+        padding-top: 24px;
+      }
+      .usuario {
+        margin-bottom: 16px;
+        padding: 16px;
+        border: 1px solid #d9e0e3;
+        border-radius: 6px;
+      }
+      .usuario-cabecalho {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .usuario-nome {
+        font-weight: bold;
+      }
+      .niveis {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .nivel {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.92rem;
+      }
+      .nivel input {
+        width: auto;
+      }
+      .salvar-acessos {
+        margin-top: 14px;
+        padding: 8px 12px;
+        border: 0;
+        border-radius: 4px;
+        background: #455a64;
+        color: #fff;
+        cursor: pointer;
+      }
+      .acoes {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 24px;
+      }
+      .botao {
+        padding: 11px 16px;
+        border: 0;
+        border-radius: 4px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .voltar {
+        background: #eceff1;
+        color: #37474f;
+      }
+      .salvar {
+        background: #0078d4;
+        color: #fff;
+      }
+      .salvar:hover {
+        background: #005ea6;
+      }
+      @media (max-width: 520px) {
+        body {
+          padding: 12px;
+        }
+        .container {
+          margin: 16px auto;
+          padding: 20px;
+        }
+        .acoes {
+          flex-direction: column-reverse;
+        }
+        .botao {
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    {% include 'partials/user_status.html' %}
+    <main class="container">
+      <div class="topo">
+        <img src="{% static 'principal/img/logo.png' %}" alt="Logo PTM" />
+        <h1>Cadastrar usuário de acesso</h1>
+      </div>
+      <p class="descricao">Crie uma conta para permitir o acesso ao sistema.</p>
+
+      {% for message in messages %}
+      <div class="mensagem">{{ message }}</div>
+      {% endfor %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="campo">
+          <label for="{{ form.username.id_for_label }}">Nome de usuário</label>
+          {{ form.username }} {% for erro in form.username.errors %}
+          <p class="erro">{{ erro }}</p>
+          {% endfor %} {% if form.username.help_text %}
+          <p class="ajuda">{{ form.username.help_text|safe }}</p>
+          {% endif %}
+        </div>
+        <div class="campo">
+          <label for="{{ form.password1.id_for_label }}">Senha</label>
+          {{ form.password1 }} {% for erro in form.password1.errors %}
+          <p class="erro">{{ erro }}</p>
+          {% endfor %} {% if form.password1.help_text %}
+          <p class="ajuda">{{ form.password1.help_text|safe }}</p>
+          {% endif %}
+        </div>
+        <div class="campo">
+          <label for="{{ form.password2.id_for_label }}"
+            >Confirmação da senha</label
+          >
+          {{ form.password2 }} {% for erro in form.password2.errors %}
+          <p class="erro">{{ erro }}</p>
+          {% endfor %}
+        </div>
+        {% for erro in form.non_field_errors %}
+        <p class="erro">{{ erro }}</p>
+        {% endfor %}
+        <div class="acoes">
+          <a class="botao voltar" href="{% url 'listar_servidores' %}"
+            >Voltar</a
+          >
+          <button class="botao salvar" type="submit">Cadastrar usuário</button>
+        </div>
+      </form>
+
+      <section class="usuarios">
+        <h2>Acessos dos usuários</h2>
+        <p class="descricao">
+          Conceda ou retire os níveis de acesso individualmente.
+        </p>
+        {% for usuario in usuarios %}
+        <form
+          class="usuario"
+          method="post"
+          action="{% url 'atualizar_acessos_usuario' usuario.id %}"
+        >
+          {% csrf_token %}
+          <div class="usuario-cabecalho">
+            <span class="usuario-nome">{{ usuario.username }}</span>
+            {% if usuario.is_superuser %}<span>Superusuário</span>{% endif %}
+          </div>
+          <div class="niveis">
+            {% for nivel in usuario.niveis %}
+            <label class="nivel"><input type="checkbox" name="grupo_{{ nivel.id }}"{{ nivel.atributos }}{{ nivel.bloqueado }}> {{ nivel.nome }}</label>
+            {% endfor %}
+          </div>
+          <button class="salvar-acessos" type="submit">Salvar acessos</button>
+        </form>
+        {% empty %}
+        <p>Nenhum usuário cadastrado.</p>
+        {% endfor %}
+      </section>
+    </main>
+  </body>
+</html>

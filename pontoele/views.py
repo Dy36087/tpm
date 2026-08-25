@@ -1,7 +1,18 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.contrib import messages
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from principal.access import (
+    NIVEIS_ACESSO,
+    NIVEL_ADMINISTRADOR,
+    grupos_de_acesso,
+    nivel_acesso,
+    usuario_administrador,
+)
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import RegistroPonto, Servidor
@@ -35,24 +46,83 @@ def gerar_matricula():
     return f"DSAF{numero:04d}"
 
 
-@login_required
+@nivel_acesso("pontoele")
 def cadfaceptm(request):
     return render(request, "cadfaceptm.html")
 
 
-@login_required
+@nivel_acesso("pontoele")
 def pontoeleptm(request):
     return render(request, "pontoeleptm.html")
 
 
-@login_required
+@nivel_acesso("pontoele")
 def usersfaceptm(request):
     servidores = Servidor.objects.all()
     return render(request, "ptmcolaboradores.html", {"servidores": servidores})
 
 
-@csrf_exempt
 @login_required
+def cadastrar_usuario(request):
+    if not usuario_administrador(request.user):
+        return HttpResponseForbidden("Apenas administradores podem cadastrar usuários.")
+
+    grupos = grupos_de_acesso()
+    form = UserCreationForm(request.POST or None)
+    if form.is_valid():
+        usuario = form.save()
+        messages.success(request, f"Usuário {usuario.username} cadastrado com sucesso.")
+        return redirect("cadastrar_usuario")
+
+    usuarios = User.objects.prefetch_related("groups").order_by("username")
+    for usuario in usuarios:
+        usuario.niveis = [
+            {
+                "nome": nome,
+                "id": grupo.id,
+                "atributos": " checked" if grupo in usuario.groups.all() else "",
+                "bloqueado": (
+                    " disabled"
+                    if usuario == request.user and nome == NIVEL_ADMINISTRADOR
+                    else ""
+                ),
+            }
+            for nome, grupo in grupos.items()
+        ]
+    return render(
+        request,
+        "cadastrar_usuario.html",
+        {
+            "form": form,
+            "usuarios": usuarios,
+            "niveis": list(grupos.items()),
+        },
+    )
+
+
+@login_required
+def atualizar_acessos_usuario(request, usuario_id):
+    if not usuario_administrador(request.user):
+        return HttpResponseForbidden("Apenas administradores podem alterar acessos.")
+    if request.method != "POST":
+        return redirect("cadastrar_usuario")
+
+    usuario = get_object_or_404(User, id=usuario_id)
+    grupos = grupos_de_acesso()
+    for nome_grupo, grupo in grupos.items():
+        if nome_grupo == NIVEL_ADMINISTRADOR and usuario == request.user:
+            continue
+        if request.POST.get(f"grupo_{grupo.id}"):
+            usuario.groups.add(grupo)
+        else:
+            usuario.groups.remove(grupo)
+
+    messages.success(request, f"Acessos de {usuario.username} atualizados.")
+    return redirect("cadastrar_usuario")
+
+
+@csrf_exempt
+@nivel_acesso("pontoele")
 def cadastrar_face(request):
     if request.method != "POST":
         return JsonResponse(
@@ -161,7 +231,7 @@ def validar_sequencia(servidor, tipo):
 
 
 @csrf_exempt
-@login_required
+@nivel_acesso("pontoele")
 def registrar_ponto(request):
 
     dados = json.loads(request.body)
@@ -232,7 +302,7 @@ def validar_face(encoding_salvo, encoding_atual):
         return False
 
 
-@login_required
+@nivel_acesso("pontoele")
 def listar_servidores(request):
 
     pesquisa = request.GET.get("q", "")
@@ -252,7 +322,7 @@ def listar_servidores(request):
     )
 
 
-@login_required
+@nivel_acesso("pontoele")
 def editar_servidor(request, servidor_id):
     servidor = get_object_or_404(Servidor, id=servidor_id)
     if request.method == "POST":
@@ -285,7 +355,7 @@ def editar_servidor(request, servidor_id):
     return redirect("listar_servidores")
 
 
-@login_required
+@nivel_acesso("pontoele")
 def excluir_servidor(request, servidor_id):
     if request.method == "POST":
         get_object_or_404(Servidor, id=servidor_id).delete()

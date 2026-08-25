@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .models import Servidor
+from principal.access import grupos_de_acesso
 
 
 class CadastrarFaceTests(TestCase):
@@ -28,6 +29,7 @@ class CadastrarFaceTests(TestCase):
         usuario = get_user_model().objects.create_user(
             username="operador", password="senha-segura"
         )
+        usuario.groups.add(grupos_de_acesso()["Ponto Eletrônico"])
         self.client.force_login(usuario)
 
         response = self.client.post(
@@ -50,6 +52,7 @@ class GerenciarServidorTests(TestCase):
         usuario = get_user_model().objects.create_user(
             username="gestor", password="senha-segura"
         )
+        usuario.groups.add(grupos_de_acesso()["Ponto Eletrônico"])
         self.client.force_login(usuario)
         self.servidor = Servidor.objects.create(
             matricula="DSAF0001",
@@ -104,3 +107,52 @@ class TemplateCadastroTests(TestCase):
         content = template_path.read_text(encoding="utf-8")
 
         self.assertIn("resultadoDeteccao.faceEncoding", content)
+
+
+class CadastrarUsuarioTests(TestCase):
+    def test_usuario_comum_nao_pode_cadastrar_usuario(self):
+        usuario = get_user_model().objects.create_user(
+            username="operador", password="senha-segura"
+        )
+        self.client.force_login(usuario)
+
+        response = self.client.get(reverse("cadastrar_usuario"))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_staff_cadastra_usuario_com_senha_utilizavel(self):
+        administrador = get_user_model().objects.create_user(
+            username="administrador", password="senha-segura", is_staff=True
+        )
+        self.client.force_login(administrador)
+
+        response = self.client.post(
+            reverse("cadastrar_usuario"),
+            {
+                "username": "novo-usuario",
+                "password1": "UmaSenhaForte123!",
+                "password2": "UmaSenhaForte123!",
+            },
+        )
+
+        self.assertRedirects(response, reverse("cadastrar_usuario"))
+        novo_usuario = get_user_model().objects.get(username="novo-usuario")
+        self.assertTrue(novo_usuario.check_password("UmaSenhaForte123!"))
+
+    def test_tela_marca_nivel_que_usuario_possui(self):
+        administrador = get_user_model().objects.create_user(
+            username="administrador", password="senha-segura", is_staff=True
+        )
+        usuario = get_user_model().objects.create_user(
+            username="patrimonio", password="senha-segura"
+        )
+        grupo = grupos_de_acesso()["Patrimônio"]
+        usuario.groups.add(grupo)
+        self.client.force_login(administrador)
+
+        response = self.client.get(reverse("cadastrar_usuario"))
+
+        self.assertContains(
+            response,
+            f'name="grupo_{grupo.id}" checked',
+        )

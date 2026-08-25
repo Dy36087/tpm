@@ -68,6 +68,9 @@
           <a href="/ptmdsa/cadferramentas/listar_ferramentas/" class="btn-primary">Pesquisa Ferramentas</a>
           <a href="/ptmdsa/pontoeleptm/cadfaceptm/" class="btn-primary">Cadastro de Ponto Eletronico</a>
           <a href="/ptmdsa/pontoeleptm/usersfaceptm/" class="btn-primary">Pesquisa De Colaboradores</a>
+          {% if request.user.is_staff %}
+            <a href="{% url 'cadastrar_usuario' %}" class="btn-primary">Cadastrar Usuario de Acesso</a>
+          {% endif %}
         </div>
       </section>
     </div>

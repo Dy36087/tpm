@@ -15,6 +15,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from principal.access import nivel_acesso
 
 from .forms import PatrimonioForm
 from .models import (
@@ -85,7 +86,7 @@ def _require_export_dependencies():
     return missing
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def dashboard(request):
 
     dados = Patrimonio.objects.values("status").annotate(total=Count("id"))
@@ -98,7 +99,7 @@ def dashboard(request):
     return JsonResponse(resultado)
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def etiqueta(request, id):
     item = Patrimonio.objects.filter(id=id).first()
     if not item:
@@ -108,7 +109,7 @@ def etiqueta(request, id):
     return render(request, "etiqueta.html", {"item": item})
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def exportar_excel_etiqueta(request, ids):
     ids_list = ids.split(",")
     itens = Patrimonio.objects.filter(id__in=ids_list)
@@ -157,7 +158,7 @@ def exportar_excel_etiqueta(request, ids):
     return response
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def exportar(request, formato, ids):
 
     ids_list = ids.split(",")
@@ -370,7 +371,7 @@ def _registrar_historico_alteracao(item, form, usuario, valores_anteriores=None)
             )
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def cadptm(request):
     if request.method == "POST":
         form = PatrimonioForm(request.POST)
@@ -391,12 +392,12 @@ def cadptm(request):
     return render(request, "cadptm.html", {"form": form})
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def pesquisar(request):
     return render(request, "searchptm.html")
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def historico_item(request, id):
     item = Patrimonio.objects.filter(id=id).first()
     if not item:
@@ -412,7 +413,7 @@ def historico_item(request, id):
     )
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def editar_item(request, id):
     item = Patrimonio.objects.filter(id=id).first()
     if not item:
@@ -447,7 +448,7 @@ def editar_item(request, id):
     return render(request, "cadptm.html", {"form": form, "editar": True, "item": item})
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def exportar_filtro(request, formato, busca, status):
     itens = Patrimonio.objects.all()
 
@@ -470,7 +471,7 @@ def exportar_filtro(request, formato, busca, status):
     return redirect("exportar", formato=formato, ids=ids)
 
 
-@login_required
+@nivel_acesso("patrimonio")
 def listar_itens(request, busca, status):
     itens = Patrimonio.objects.all()
 
@@ -508,7 +509,7 @@ def listar_itens(request, busca, status):
     )
 
 
-@login_required
+@nivel_acesso("patrimonio")
 @require_POST
 def excluir_item(request, id):
     try:

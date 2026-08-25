@@ -16,6 +16,34 @@
         font-family: Arial, sans-serif;
         background: #f4f6f9;
       }
+
+      .cabecalho {
+        width: 700px;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .logo-topo img {
+        height: 80px;
+        display: block;
+      }
+
+      .botao-principal {
+        padding: 10px 16px;
+        border-radius: 5px;
+        background: #0078d4;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+
+      .botao-principal:hover {
+        background: #005ea6;
+      }
       
       .container {
         width: 700px;
@@ -75,6 +103,10 @@
       }
       
       @media (max-width: 768px) {
+        .cabecalho {
+          width: 100%;
+        }
+
         .container {
           width: 100%;
           padding: 14px;
@@ -94,6 +126,12 @@
 
   <body>
     {% include 'partials/user_status.html' %}
+    <header class="cabecalho">
+      <a class="logo-topo" href="{% url 'home' %}" aria-label="Ir para a página principal">
+        <img src="{% static 'principal/img/logo.png' %}" alt="Logo PTM" />
+      </a>
+      <a class="botao-principal" href="{% url 'home' %}">Página principal</a>
+    </header>
     <div class="container">
       <h2>Cadastro Biométrico Facial</h2>
 

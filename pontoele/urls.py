@@ -18,4 +18,10 @@ urlpatterns = [
         name="excluir_servidor",
     ),
     path("usersfaceptm/", views.usersfaceptm, name="usersfaceptm"),
+    path("cadastrar-usuario/", views.cadastrar_usuario, name="cadastrar_usuario"),
+    path(
+        "cadastrar-usuario/<int:usuario_id>/acessos/",
+        views.atualizar_acessos_usuario,
+        name="atualizar_acessos_usuario",
+    ),
 ]

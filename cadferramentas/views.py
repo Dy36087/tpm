@@ -6,6 +6,7 @@ from pontoele.models import Servidor
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.db.models import Count
+from principal.access import nivel_acesso
 
 try:
     from openpyxl import Workbook
@@ -21,7 +22,7 @@ except ImportError:  # pragma: no cover - dependência opcional
 # Create your views here.
 
 
-@login_required
+@nivel_acesso("ferramentas")
 def dashboard_ferramentas(request):
 
     total_ferramentas = Ferramenta.objects.count()
@@ -47,7 +48,7 @@ def dashboard_ferramentas(request):
     )
 
 
-@login_required
+@nivel_acesso("ferramentas")
 def exportar_ferramentas_pdf(request):
     if canvas is None:
         return HttpResponse(
@@ -88,7 +89,7 @@ def exportar_ferramentas_pdf(request):
     return response
 
 
-@login_required
+@nivel_acesso("ferramentas")
 def exportar_ferramentas_excel(request):
     if Workbook is None:
         return HttpResponse(
@@ -142,7 +143,7 @@ def exportar_ferramentas_excel(request):
     return response
 
 
-@login_required
+@nivel_acesso("ferramentas")
 def cadferramentas(request):
 
     servidores = Servidor.objects.all().order_by("nome")
@@ -150,7 +151,7 @@ def cadferramentas(request):
     return render(request, "cadferramentas.html", {"servidores": servidores})
 
 
-@login_required
+@nivel_acesso("ferramentas")
 def listar_ferramentas(request):
 
     ferramentas = Ferramenta.objects.all().order_by("codigo")
@@ -195,7 +196,7 @@ def listar_ferramentas(request):
     )
 
 
-@login_required
+@nivel_acesso("ferramentas")
 def cadastrar_ferramenta(request):
     if request.method == "POST":
         possui_patrimonio = request.POST.get("possui_patrimonio", "sim").strip().lower()
@@ -274,7 +275,7 @@ def _registrar_historico_ferramenta(ferramenta, dados_novos, usuario):
             )
 
 
-@login_required
+@nivel_acesso("ferramentas")
 def historico_ferramenta(request, id):
     ferramenta = get_object_or_404(Ferramenta, id=id)
     historico = ferramenta.historicos.select_related("usuario").all()
@@ -285,7 +286,7 @@ def historico_ferramenta(request, id):
     )
 
 
-@login_required
+@nivel_acesso("ferramentas")
 def editar_ferramenta(request, id):
 
     ferramenta = get_object_or_404(Ferramenta, id=id)

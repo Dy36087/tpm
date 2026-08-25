@@ -4,15 +4,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
+    <title>PTM DSA - LOGIN</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}" />
     <link rel="stylesheet" href="{% static 'principal/css/principal.css' %}" />
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
   </head>
   <body>
     {% include 'partials/user_status.html' %}
     <div class="page-container">
+      <img src="{% static 'principal/img/logo.png' %}" alt="Logo PTM" />
       <section class="hero">
-        <h1>Entrar</h1>
+        <h1>PTM DSA - LOGIN</h1>
         <form method="post">
           {% csrf_token %}
           {{ form.as_p }}
