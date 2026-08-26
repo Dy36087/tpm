@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from pontoele.models import Servidor
 from django.http import HttpResponse
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Q
 from principal.access import nivel_acesso
 from django.views.decorators.http import require_POST
 
@@ -198,6 +198,47 @@ def listar_ferramentas(request):
 
 
 @nivel_acesso("ferramentas")
+def relatorio_ferramentas(request):
+    ferramenta_filtro = request.GET.get("ferramenta", "").strip()
+    local_filtro = request.GET.get("local", "").strip()
+    responsavel_filtro = request.GET.get("responsavel", "").strip()
+    historico_filtro = request.GET.get("historico", "").strip()
+
+    ferramentas = (
+        Ferramenta.objects.select_related("responsavel")
+        .prefetch_related("historicos__usuario")
+        .order_by("codigo")
+    )
+    if ferramenta_filtro:
+        ferramentas = ferramentas.filter(
+            Q(nome__icontains=ferramenta_filtro)
+            | Q(codigo__icontains=ferramenta_filtro)
+            | Q(patrimonio__icontains=ferramenta_filtro)
+        )
+    if local_filtro:
+        ferramentas = ferramentas.filter(local=local_filtro)
+    if responsavel_filtro:
+        ferramentas = ferramentas.filter(responsavel_id=responsavel_filtro)
+    if historico_filtro == "sim":
+        ferramentas = ferramentas.filter(historicos__isnull=False).distinct()
+    elif historico_filtro == "nao":
+        ferramentas = ferramentas.filter(historicos__isnull=True)
+
+    return render(
+        request,
+        "relatorio_ferramentas.html",
+        {
+            "ferramentas": ferramentas,
+            "servidores": Servidor.objects.all().order_by("nome"),
+            "ferramenta_filtro": ferramenta_filtro,
+            "local_filtro": local_filtro,
+            "responsavel_filtro": responsavel_filtro,
+            "historico_filtro": historico_filtro,
+        },
+    )
+
+
+@nivel_acesso("ferramentas")
 def cadastrar_ferramenta(request):
     if request.method == "POST":
         possui_patrimonio = request.POST.get("possui_patrimonio", "sim").strip().lower()
@@ -306,6 +347,7 @@ def editar_ferramenta(request, id):
                 "local",
                 "descricao",
                 "observacao",
+                "responsavel",
             ]
         }
 
@@ -333,6 +375,9 @@ def editar_ferramenta(request, id):
             "local": local,
             "descricao": request.POST.get("descricao", ""),
             "observacao": request.POST.get("observacao", ""),
+            "responsavel": Servidor.objects.filter(
+                id=request.POST.get("responsavel", "").strip()
+            ).first(),
         }
 
         _registrar_historico_ferramenta(ferramenta, dados_novos, request.user)
@@ -347,6 +392,7 @@ def editar_ferramenta(request, id):
         ferramenta.local = dados_novos["local"]
         ferramenta.descricao = dados_novos["descricao"]
         ferramenta.observacao = dados_novos["observacao"]
+        ferramenta.responsavel = dados_novos["responsavel"]
 
         ferramenta.save()
 
@@ -361,7 +407,11 @@ def editar_ferramenta(request, id):
     return render(
         request,
         "editferramenta.html",
-        {"ferramenta": ferramenta, "local_custom": local_custom},
+        {
+            "ferramenta": ferramenta,
+            "local_custom": local_custom,
+            "servidores": Servidor.objects.all().order_by("nome"),
+        },
     )
 
 

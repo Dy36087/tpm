@@ -5,6 +5,7 @@ from django.test import Client, SimpleTestCase, TestCase
 
 from .models import Ferramenta
 from principal.access import grupos_de_acesso
+from pontoele.models import Servidor
 
 
 class ViewsImportTests(SimpleTestCase):
@@ -83,6 +84,42 @@ class HistoricoFerramentaTest(TestCase):
         self.assertTrue(ferramenta.historicos.exists())
         self.assertIn("nome", [h.campo for h in ferramenta.historicos.all()])
 
+    def test_editar_ferramenta_atualiza_responsavel(self):
+        servidor = Servidor.objects.create(
+            matricula="DSAF0099",
+            nome="Responsável Teste",
+            cpf="999.999.999-99",
+            rg="9999999",
+            data_nascimento="1990-01-01",
+            email="responsavel@example.com",
+            telefone="61999999999",
+            cep="70000-000",
+            endereco="Rua Teste",
+            bairro="Centro",
+            cidade="Brasília",
+            uf="DF",
+        )
+        ferramenta = Ferramenta.objects.create(
+            codigo="DSAFM-0003",
+            patrimonio="SEM_PATRIMONIO",
+            categoria="MANUAL",
+            fabricante="ACME",
+            nome="Chave",
+            estado="NOVO",
+            local="COFEN",
+        )
+
+        client = Client()
+        client.force_login(self.user)
+        response = client.post(
+            f"/ptmdsa/cadferramentas/editar/{ferramenta.id}/",
+            {"responsavel": str(servidor.id), "nome": ferramenta.nome},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        ferramenta.refresh_from_db()
+        self.assertEqual(ferramenta.responsavel_id, servidor.id)
+
     def test_excluir_ferramenta_remove_registro(self):
         ferramenta = Ferramenta.objects.create(
             codigo="DSAFM-0002",
@@ -101,3 +138,37 @@ class HistoricoFerramentaTest(TestCase):
 
         self.assertRedirects(response, "/ptmdsa/cadferramentas/listar_ferramentas/")
         self.assertFalse(Ferramenta.objects.filter(id=ferramenta.id).exists())
+
+    def test_relatorio_filtra_por_responsavel_e_historico(self):
+        servidor = Servidor.objects.create(
+            matricula="DSAF0100",
+            nome="Responsável Relatório",
+            cpf="888.888.888-88",
+            rg="8888888",
+            data_nascimento="1990-01-01",
+            email="relatorio@example.com",
+            telefone="61999999999",
+            cep="70000-000",
+            endereco="Rua Teste",
+            bairro="Centro",
+            cidade="Brasília",
+            uf="DF",
+        )
+        ferramenta = Ferramenta.objects.create(
+            codigo="DSAFM-0004",
+            nome="Relatório Teste",
+            categoria="MANUAL",
+            local="COFEN",
+            responsavel=servidor,
+        )
+        ferramenta.historicos.create(campo="nome", valor_novo="alterado")
+
+        client = Client()
+        client.force_login(self.user)
+        response = client.get(
+            "/ptmdsa/cadferramentas/relatorio/",
+            {"responsavel": servidor.id, "historico": "sim"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, ferramenta.codigo)

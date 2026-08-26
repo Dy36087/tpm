@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatório de Ferramentas</title>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
+    <style>
+      body { margin: 0; padding: 28px 16px; background: #f4f6f9; color: #263238; font-family: Arial, sans-serif; }
+      .container { width: min(1180px, 100%); margin: 28px auto; padding: 26px; box-sizing: border-box; background: #fff; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,.1); }
+      h1 { margin-top: 0; color: #1f2933; }
+      .filtros { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 28px; }
+      label { display: block; margin-bottom: 6px; font-weight: bold; }
+      input, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #b0bec5; border-radius: 4px; background: #fff; }
+      button, .link { display: inline-block; padding: 10px 14px; border: 0; border-radius: 4px; background: #0078d4; color: #fff; font-weight: bold; text-decoration: none; cursor: pointer; }
+      button:hover, .link:hover { background: #005ea6; }
+      .secundario { background: #607d8b; }
+      .resultado { overflow-x: auto; }
+      table { width: 100%; min-width: 850px; border-collapse: collapse; }
+      th, td { padding: 11px; border-bottom: 1px solid #d9e0e3; text-align: left; vertical-align: top; }
+      th { background: #0078d4; color: #fff; }
+      .historico { margin: 0; padding-left: 18px; }
+      .acoes { display: flex; gap: 10px; margin-top: 24px; }
+      .vazio { padding: 18px; background: #f1f3f4; }
+      @media (max-width: 850px) { .filtros { grid-template-columns: 1fr 1fr; } .filtros .campo:first-child { grid-column: 1 / -1; } }
+      @media (max-width: 520px) { .container { margin: 12px auto; padding: 18px; } .filtros { grid-template-columns: 1fr; } .filtros .campo:first-child { grid-column: auto; } .acoes { flex-direction: column; } }
+    </style>
+  </head>
+  <body>
+    {% include 'partials/user_status.html' %}
+    <main class="container">
+      <h1>Relatório de ferramentas</h1>
+      <form method="get" class="filtros">
+        <div class="campo">
+          <label for="ferramenta">Ferramenta</label>
+          <input id="ferramenta" name="ferramenta" value="{{ ferramenta_filtro }}" placeholder="Nome, código ou patrimônio" />
+        </div>
+        <div class="campo">
+          <label for="local">Local</label>
+          <select id="local" name="local">
+            <option value="">Todos</option>
+            <option value="COFEN" {% if local_filtro == 'COFEN' %}selected{% endif %}>COFEN</option>
+            <option value="CAESB" {% if local_filtro == 'CAESB' %}selected{% endif %}>CAESB</option>
+            <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" {% if local_filtro == 'VIAGEM (ESPECIFICAR NA DESCRIÇÃO)' %}selected{% endif %}>Viagem</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="responsavel">Responsável</label>
+          <select id="responsavel" name="responsavel">
+            <option value="">Todos</option>
+            {% for servidor in servidores %}<option value="{{ servidor.id }}" {% if responsavel_filtro == servidor.id|stringformat:'s' %}selected{% endif %}>{{ servidor.nome }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="campo">
+          <label for="historico">Histórico</label>
+          <select id="historico" name="historico">
+            <option value="">Todos</option>
+            <option value="sim" {% if historico_filtro == 'sim' %}selected{% endif %}>Com histórico</option>
+            <option value="nao" {% if historico_filtro == 'nao' %}selected{% endif %}>Sem histórico</option>
+          </select>
+        </div>
+        <button type="submit">Gerar relatório</button>
+      </form>
+
+      <div class="resultado">
+        {% if ferramentas %}
+        <table>
+          <thead><tr><th>Código</th><th>Ferramenta</th><th>Local</th><th>Responsável</th><th>Estado</th><th>Histórico</th></tr></thead>
+          <tbody>
+            {% for ferramenta in ferramentas %}
+            <tr>
+              <td>{{ ferramenta.codigo }}</td>
+              <td>{{ ferramenta.nome }}<br />{{ ferramenta.patrimonio }}</td>
+              <td>{{ ferramenta.local }}</td>
+              <td>{% if ferramenta.responsavel %}{{ ferramenta.responsavel.nome }}<br />{{ ferramenta.responsavel.matricula }}{% else %}Não informado{% endif %}</td>
+              <td>{{ ferramenta.estado }}</td>
+              <td><ul class="historico">{% for item in ferramenta.historicos.all %}<li>{{ item.data_hora|date:'d/m/Y H:i' }}: {{ item.campo }} ({{ item.valor_anterior|default:'-' }} &rarr; {{ item.valor_novo|default:'-' }})</li>{% empty %}<li>Sem alterações registradas</li>{% endfor %}</ul></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}<p class="vazio">Nenhuma ferramenta encontrada para os filtros informados.</p>{% endif %}
+      </div>
+      <div class="acoes"><a class="link" href="{% url 'listar_ferramentas' %}">Voltar para ferramentas</a><a class="link secundario" href="{% url 'cadferramentas' %}">Cadastrar ferramenta</a></div>
+    </main>
+  </body>
+</html>
