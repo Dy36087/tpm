@@ -69,3 +69,19 @@ class Ferramenta(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class FotoFerramenta(models.Model):
+    ferramenta = models.ForeignKey(
+        Ferramenta,
+        on_delete=models.CASCADE,
+        related_name="fotos",
+    )
+    imagem = models.ImageField(upload_to="ferramentas/")
+    criada_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["criada_em"]
+
+    def __str__(self):
+        return f"Foto de {self.ferramenta.nome}"

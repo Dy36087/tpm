@@ -1,9 +1,10 @@
 from importlib import import_module
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, SimpleTestCase, TestCase
 
-from .models import Ferramenta
+from .models import FotoFerramenta, Ferramenta
 from principal.access import grupos_de_acesso
 from pontoele.models import Servidor
 
@@ -119,6 +120,40 @@ class HistoricoFerramentaTest(TestCase):
         self.assertEqual(response.status_code, 302)
         ferramenta.refresh_from_db()
         self.assertEqual(ferramenta.responsavel_id, servidor.id)
+
+    def test_cadastrar_ferramenta_salva_fotos(self):
+        client = Client()
+        client.force_login(self.user)
+        foto = SimpleUploadedFile(
+            "ferramenta.jpg", b"fake-image-content", content_type="image/jpeg"
+        )
+
+        response = client.post(
+            "/ptmdsa/cadferramentas/cadastrar_ferramenta/",
+            {"nome": "Alicate", "fotos": foto},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        ferramenta = Ferramenta.objects.latest("id")
+        self.assertEqual(
+            FotoFerramenta.objects.filter(ferramenta=ferramenta).count(), 1
+        )
+
+    def test_editar_ferramenta_adiciona_fotos(self):
+        ferramenta = Ferramenta.objects.create(nome="Chave", local="COFEN")
+        foto = SimpleUploadedFile(
+            "nova-foto.jpg", b"fake-image-content", content_type="image/jpeg"
+        )
+        client = Client()
+        client.force_login(self.user)
+
+        response = client.post(
+            f"/ptmdsa/cadferramentas/editar/{ferramenta.id}/",
+            {"nome": ferramenta.nome, "fotos": foto},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(FotoFerramenta.objects.filter(ferramenta=ferramenta).exists())
 
     def test_excluir_ferramenta_remove_registro(self):
         ferramenta = Ferramenta.objects.create(

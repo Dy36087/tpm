@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .models import Ferramenta, HistoricoAlteracaoFerramenta
+from .models import FotoFerramenta, Ferramenta, HistoricoAlteracaoFerramenta
 from django.shortcuts import get_object_or_404
 from pontoele.models import Servidor
 from django.http import HttpResponse
@@ -277,6 +277,8 @@ def cadastrar_ferramenta(request):
             responsavel=responsavel,
         )
         ferramenta.save()
+        for imagem in request.FILES.getlist("fotos"):
+            FotoFerramenta.objects.create(ferramenta=ferramenta, imagem=imagem)
         return redirect("cadferramentas")
 
     return render(request, "cadferramentas.html")
@@ -395,6 +397,8 @@ def editar_ferramenta(request, id):
         ferramenta.responsavel = dados_novos["responsavel"]
 
         ferramenta.save()
+        for imagem in request.FILES.getlist("fotos"):
+            FotoFerramenta.objects.create(ferramenta=ferramenta, imagem=imagem)
 
         return redirect("listar_ferramentas")
 
