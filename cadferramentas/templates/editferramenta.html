@@ -371,6 +371,16 @@
         </select>
       </div>
 
+      <div class="form-group">
+        <label for="responsavel">Responsável pela Ferramenta</label>
+        <select id="responsavel" name="responsavel" required>
+            <option value="">Selecione um responsável</option>
+            {% for servidor in servidores %}
+              <option value="{{ servidor.id }}" {% if ferramenta.responsavel_id == servidor.id %}selected{% endif %}>{{ servidor.nome }} - Matrícula {{ servidor.matricula }}</option>
+            {% endfor %}
+        </select>
+      </div>
+
       <label>Descrição</label>
       <textarea name="descricao">{{ ferramenta.descricao }}</textarea>
 
