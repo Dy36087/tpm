@@ -1,8 +1,10 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
+from django import forms
+from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from smtplib import SMTPException
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -29,6 +31,14 @@ try:
     import numpy as np
 except ImportError:  # pragma: no cover
     np = None
+
+
+class UsuarioCreationForm(UserCreationForm):
+    email = forms.EmailField(required=False, label="E-mail")
+
+    class Meta:
+        model = User
+        fields = ("username", "email")
 
 
 # Create your views here.
@@ -68,7 +78,7 @@ def cadastrar_usuario(request):
         return HttpResponseForbidden("Apenas administradores podem cadastrar usuários.")
 
     grupos = grupos_de_acesso()
-    form = UserCreationForm(request.POST or None)
+    form = UsuarioCreationForm(request.POST or None)
     if form.is_valid():
         usuario = form.save()
         messages.success(request, f"Usuário {usuario.username} cadastrado com sucesso.")
@@ -108,6 +118,13 @@ def atualizar_acessos_usuario(request, usuario_id):
         return redirect("cadastrar_usuario")
 
     usuario = get_object_or_404(User, id=usuario_id)
+    email = request.POST.get("email", "").strip()
+    try:
+        usuario.email = forms.EmailField(required=False).clean(email)
+    except forms.ValidationError:
+        messages.error(request, "Informe um e-mail válido para o usuário.")
+        return redirect("cadastrar_usuario")
+    usuario.save(update_fields=["email"])
     grupos = grupos_de_acesso()
     for nome_grupo, grupo in grupos.items():
         if nome_grupo == NIVEL_ADMINISTRADOR and usuario == request.user:
@@ -118,6 +135,46 @@ def atualizar_acessos_usuario(request, usuario_id):
             usuario.groups.remove(grupo)
 
     messages.success(request, f"Acessos de {usuario.username} atualizados.")
+    return redirect("cadastrar_usuario")
+
+
+@login_required
+def enviar_link_redefinicao_senha(request):
+    if not usuario_administrador(request.user):
+        return HttpResponseForbidden("Apenas administradores podem redefinir senhas.")
+    if request.method != "POST":
+        return redirect("cadastrar_usuario")
+
+    usuario = get_object_or_404(User, id=request.POST.get("usuario_id"))
+    if not usuario.email:
+        messages.error(
+            request,
+            f"O usuário {usuario.username} não possui e-mail cadastrado.",
+        )
+        return redirect("cadastrar_usuario")
+
+    form = PasswordResetForm({"email": usuario.email})
+    if not form.is_valid():
+        messages.error(request, "O e-mail cadastrado não é válido.")
+        return redirect("cadastrar_usuario")
+
+    try:
+        form.save(
+            request=request,
+            use_https=request.is_secure(),
+            subject_template_name="registration/password_reset_subject.txt",
+            email_template_name="registration/password_reset_email.html",
+        )
+    except (SMTPException, OSError):
+        messages.error(
+            request,
+            "Não foi possível enviar o e-mail. Verifique a configuração SMTP.",
+        )
+    else:
+        messages.success(
+            request,
+            f"Link para alteração de senha enviado para {usuario.email}.",
+        )
     return redirect("cadastrar_usuario")
 
 

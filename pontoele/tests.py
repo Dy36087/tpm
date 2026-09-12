@@ -3,7 +3,8 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.core import mail
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import Servidor
@@ -156,3 +157,63 @@ class CadastrarUsuarioTests(TestCase):
             response,
             f'name="grupo_{grupo.id}" checked',
         )
+
+    def test_staff_cadastra_usuario_com_email(self):
+        administrador = get_user_model().objects.create_user(
+            username="administrador", password="senha-segura", is_staff=True
+        )
+        self.client.force_login(administrador)
+
+        response = self.client.post(
+            reverse("cadastrar_usuario"),
+            {
+                "username": "usuario-com-email",
+                "email": "usuario@example.com",
+                "password1": "UmaSenhaForte123!",
+                "password2": "UmaSenhaForte123!",
+            },
+        )
+
+        self.assertRedirects(response, reverse("cadastrar_usuario"))
+        usuario = get_user_model().objects.get(username="usuario-com-email")
+        self.assertEqual(usuario.email, "usuario@example.com")
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="noreply@example.com",
+    )
+    def test_administrador_envia_link_para_usuario_selecionado(self):
+        administrador = get_user_model().objects.create_user(
+            username="administrador", password="senha-segura", is_staff=True
+        )
+        usuario = get_user_model().objects.create_user(
+            username="patrimonio",
+            password="senha-segura",
+            email="patrimonio@example.com",
+        )
+        self.client.force_login(administrador)
+
+        response = self.client.post(
+            reverse("enviar_link_redefinicao_senha"),
+            {"usuario_id": usuario.id},
+        )
+
+        self.assertRedirects(response, reverse("cadastrar_usuario"))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("/senha/redefinir/", mail.outbox[0].body)
+
+    def test_usuario_comum_nao_pode_enviar_link_de_senha(self):
+        usuario = get_user_model().objects.create_user(
+            username="operador", password="senha-segura"
+        )
+        alvo = get_user_model().objects.create_user(
+            username="patrimonio", email="patrimonio@example.com"
+        )
+        self.client.force_login(usuario)
+
+        response = self.client.post(
+            reverse("enviar_link_redefinicao_senha"),
+            {"usuario_id": alvo.id},
+        )
+
+        self.assertEqual(response.status_code, 403)

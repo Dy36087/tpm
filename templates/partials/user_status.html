@@ -33,14 +33,21 @@
     box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
   }
   
-  .user-status a {
+  .user-status a,
+  .user-status .logout-button {
     color: #ffffff;
     text-decoration: none;
     font-weight: 700;
     margin-left: 4px;
+    font: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
   }
   
-  .user-status a:hover {
+  .user-status a:hover,
+  .user-status .logout-button:hover {
     text-decoration: underline;
   }
   
@@ -59,7 +66,10 @@
   <span class="status-dot {% if request.user.is_authenticated %}online{% endif %}"></span>
   {% if request.user.is_authenticated %}
     <span>Conectado: {{ request.user.get_full_name|default:request.user.username }}</span>
-    <a href="{% url 'logout' %}">Sair</a>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button class="logout-button" type="submit">Sair</button>
+    </form>
   {% else %}
     <span>Não conectado</span>
     <a href="{% url 'login' %}">Entrar</a>

@@ -366,6 +366,13 @@ def editar_ferramenta(request, id):
         if local == "NOVO_LOCAL":
             local = local_novo or "OUTRO"
 
+        responsavel_id = request.POST.get("responsavel", "").strip()
+        responsavel = (
+            Servidor.objects.filter(id=responsavel_id).first()
+            if responsavel_id
+            else None
+        )
+
         dados_novos = {
             "possui_patrimonio": possui_patrimonio,
             "patrimonio": patrimonio,
@@ -377,9 +384,7 @@ def editar_ferramenta(request, id):
             "local": local,
             "descricao": request.POST.get("descricao", ""),
             "observacao": request.POST.get("observacao", ""),
-            "responsavel": Servidor.objects.filter(
-                id=request.POST.get("responsavel", "").strip()
-            ).first(),
+            "responsavel": responsavel,
         }
 
         _registrar_historico_ferramenta(ferramenta, dados_novos, request.user)

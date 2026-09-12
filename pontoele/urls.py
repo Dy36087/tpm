@@ -20,6 +20,11 @@ urlpatterns = [
     path("usersfaceptm/", views.usersfaceptm, name="usersfaceptm"),
     path("cadastrar-usuario/", views.cadastrar_usuario, name="cadastrar_usuario"),
     path(
+        "cadastrar-usuario/enviar-link-senha/",
+        views.enviar_link_redefinicao_senha,
+        name="enviar_link_redefinicao_senha",
+    ),
+    path(
         "cadastrar-usuario/<int:usuario_id>/acessos/",
         views.atualizar_acessos_usuario,
         name="atualizar_acessos_usuario",

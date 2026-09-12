@@ -28,3 +28,15 @@ class LoginRedirectTests(TestCase):
             response = self.client.get(reverse(route))
             self.assertEqual(response.status_code, 302)
             self.assertIn("/login/", response.url)
+
+    def test_logout_ends_authenticated_session(self):
+        user = get_user_model().objects.create_user(
+            username="logoutuser", password="secret123"
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(reverse("logout"), follow=False)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/login/")
+        self.assertNotIn("_auth_user_id", self.client.session)

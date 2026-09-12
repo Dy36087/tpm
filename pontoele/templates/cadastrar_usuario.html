@@ -198,6 +198,14 @@
           {% endif %}
         </div>
         <div class="campo">
+          <label for="{{ form.email.id_for_label }}">E-mail</label>
+          {{ form.email }}
+          <p class="ajuda">Usado para enviar o link de alteração de senha.</p>
+          {% for erro in form.email.errors %}
+          <p class="erro">{{ erro }}</p>
+          {% endfor %}
+        </div>
+        <div class="campo">
           <label for="{{ form.password1.id_for_label }}">Senha</label>
           {{ form.password1 }} {% for erro in form.password1.errors %}
           <p class="erro">{{ erro }}</p>
@@ -240,16 +248,37 @@
             <span class="usuario-nome">{{ usuario.username }}</span>
             {% if usuario.is_superuser %}<span>Superusuário</span>{% endif %}
           </div>
+          <div class="campo">
+            <label for="email-{{ usuario.id }}">E-mail</label>
+            <input id="email-{{ usuario.id }}" type="email" name="email" value="{{ usuario.email }}" placeholder="usuario@exemplo.com" />
+          </div>
           <div class="niveis">
             {% for nivel in usuario.niveis %}
             <label class="nivel"><input type="checkbox" name="grupo_{{ nivel.id }}"{{ nivel.atributos }}{{ nivel.bloqueado }}> {{ nivel.nome }}</label>
             {% endfor %}
           </div>
-          <button class="salvar-acessos" type="submit">Salvar acessos</button>
+          <button class="salvar-acessos" type="submit">Salvar acessos e e-mail</button>
         </form>
         {% empty %}
         <p>Nenhum usuário cadastrado.</p>
         {% endfor %}
+      </section>
+      <section class="usuarios">
+        <h2>Alterar senha por e-mail</h2>
+        <p class="descricao">Selecione um usuário para enviar um link seguro ao e-mail cadastrado.</p>
+        <form method="post" action="{% url 'enviar_link_redefinicao_senha' %}">
+          {% csrf_token %}
+          <div class="campo">
+            <label for="usuario_id">Usuário</label>
+            <select id="usuario_id" name="usuario_id" required>
+              <option value="">Selecione um usuário</option>
+              {% for usuario in usuarios %}
+              <option value="{{ usuario.id }}">{{ usuario.username }}{% if usuario.email %} - {{ usuario.email }}{% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button class="salvar-acessos" type="submit">Enviar link de alteração</button>
+        </form>
       </section>
     </main>
   </body>

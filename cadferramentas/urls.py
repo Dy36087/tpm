@@ -8,6 +8,7 @@ urlpatterns = [
     path(
         "cadastrar_ferramenta/", views.cadastrar_ferramenta, name="cadastrar_ferramenta"
     ),
+    path("cadastrar/", views.cadastrar_ferramenta),
     path("editar/<int:id>/", views.editar_ferramenta, name="editar_ferramenta"),
     path("excluir/<int:id>/", views.excluir_ferramenta, name="excluir_ferramenta"),
     path(
