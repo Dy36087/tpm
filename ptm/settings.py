@@ -18,6 +18,13 @@ try:
 except ImportError:
     WHITENOISE_INSTALLED = False
 
+try:
+    import cloudinary_storage  # noqa: F401
+
+    CLOUDINARY_STORAGE_INSTALLED = True
+except ImportError:
+    CLOUDINARY_STORAGE_INSTALLED = False
+
 # Carregar variáveis de .env se existir
 if load_dotenv:
     load_dotenv()
@@ -37,6 +44,9 @@ SECRET_KEY = os.environ.get(
 
 IS_HEROKU = bool(os.environ.get("DYNO") or os.environ.get("HEROKU_APP_NAME"))
 DEBUG = os.environ.get("DJANGO_DEBUG", "0" if IS_HEROKU else "1") == "1"
+
+# Storage persistente de mídia (Heroku apaga arquivos locais a cada restart do dyno)
+USE_CLOUDINARY = CLOUDINARY_STORAGE_INSTALLED and bool(os.environ.get("CLOUDINARY_URL"))
 
 if IS_HEROKU:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ptm.settings")
@@ -111,7 +121,9 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    *(["cloudinary_storage"] if USE_CLOUDINARY else []),
     "django.contrib.staticfiles",
+    *(["cloudinary"] if USE_CLOUDINARY else []),
     "principal.apps.PrincipalConfig",
     "cadptm.apps.CadptmConfig",
     "cadferramentas.apps.CadferramentasConfig",
@@ -216,7 +228,13 @@ MEDIA_URL = "/media/"
 
 # Garantir que o ambiente online use o banco e os arquivos corretos
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "default": {
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if USE_CLOUDINARY
+            else "django.core.files.storage.FileSystemStorage"
+        )
+    },
     "staticfiles": {
         "BACKEND": (
             "whitenoise.storage.CompressedManifestStaticFilesStorage"

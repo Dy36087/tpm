@@ -10,3 +10,5 @@ openpyxl
 reportlab
 qrcode
 barcode
+django-cloudinary-storage
+cloudinary

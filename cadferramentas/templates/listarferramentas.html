@@ -127,6 +127,13 @@
         border: 1px solid #d9e0e3;
       }
 
+      .fotos-ferramenta img.foto-indisponivel {
+        object-fit: contain;
+        padding: 12px;
+        opacity: 0.5;
+        background: #f4f6f9;
+      }
+
       .card-ferramenta {
         background: #fff;
         border-left: 5px solid #0078d4;
@@ -327,6 +334,9 @@
   </head>
   <body>
     {% include 'partials/user_status.html' %}
+    <script>
+      window.FOTO_FALLBACK_URL = "{% static 'principal/img/logo.png' %}";
+    </script>
 
     <h2>PTM - DSA - FERRAMENTAS CADASTRADAS</h2>
 
@@ -396,6 +406,7 @@
                 src="{{ foto.imagem.url }}"
                 alt="Foto de {{ ferramenta.nome }}"
                 loading="lazy"
+                onerror="this.onerror=null;this.src=window.FOTO_FALLBACK_URL;this.classList.add('foto-indisponivel');"
               />
             </a>
             {% endfor %}
