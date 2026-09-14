@@ -148,8 +148,27 @@ def exportar_ferramentas_excel(request):
 def cadferramentas(request):
 
     servidores = Servidor.objects.all().order_by("nome")
+    locais_padrao = [
+        "COFEN",
+        "CAESB",
+        "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)",
+    ]
+    locais_cadastrados = list(
+        Ferramenta.objects.values_list("local", flat=True)
+        .exclude(local="")
+        .exclude(local__in=locais_padrao)
+        .distinct()
+        .order_by("local")
+    )
 
-    return render(request, "cadferramentas.html", {"servidores": servidores})
+    return render(
+        request,
+        "cadferramentas.html",
+        {
+            "servidores": servidores,
+            "locais_cadastrados": locais_cadastrados,
+        },
+    )
 
 
 @nivel_acesso("ferramentas")
@@ -419,6 +438,19 @@ def editar_ferramenta(request, id):
         {
             "ferramenta": ferramenta,
             "local_custom": local_custom,
+            "locais_cadastrados": list(
+                Ferramenta.objects.values_list("local", flat=True)
+                .exclude(local="")
+                .exclude(
+                    local__in=[
+                        "COFEN",
+                        "CAESB",
+                        "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)",
+                    ]
+                )
+                .distinct()
+                .order_by("local")
+            ),
             "servidores": Servidor.objects.all().order_by("nome"),
         },
     )

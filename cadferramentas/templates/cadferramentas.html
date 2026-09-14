@@ -160,6 +160,9 @@
             <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)">
               VIAGEM (ESPECIFICAR NA DESCRIÇÃO)
             </option>
+            {% for local_cadastrado in locais_cadastrados %}
+            <option value="{{ local_cadastrado }}">{{ local_cadastrado }}</option>
+            {% endfor %}
             <option value="NOVO_LOCAL">Cadastrar local novo...</option>
           </select>
         </div>

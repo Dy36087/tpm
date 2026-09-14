@@ -351,6 +351,9 @@
             <option value="COFEN" {% if ferramenta.local == "COFEN" %}selected{% endif %}>COFEN</option>
             <option value="CAESB" {% if ferramenta.local == "CAESB" %}selected{% endif %}>CAESB</option>
             <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" {% if ferramenta.local == "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" %}selected{% endif %}>VIAGEM (ESPECIFICAR NA DESCRIÇÃO)</option>
+            {% for local_cadastrado in locais_cadastrados %}
+            <option value="{{ local_cadastrado }}" {% if ferramenta.local == local_cadastrado %}selected{% endif %}>{{ local_cadastrado }}</option>
+            {% endfor %}
             <option value="NOVO_LOCAL" {% if local_custom %}selected{% endif %}>Cadastrar local novo...</option>
           </select>
       </div>

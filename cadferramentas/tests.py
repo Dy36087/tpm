@@ -49,6 +49,17 @@ class HistoricoFerramentaTest(TestCase):
         self.assertEqual(ferramenta.possui_patrimonio, "nao")
         self.assertEqual(ferramenta.patrimonio, "SEM_PATRIMONIO")
 
+    def test_cadastro_exibe_locais_customizados_existentes(self):
+        Ferramenta.objects.create(nome="Furadeira", local="OFICINA CENTRAL")
+
+        client = Client()
+        client.force_login(self.user)
+
+        response = client.get("/ptmdsa/cadferramentas/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="OFICINA CENTRAL">OFICINA CENTRAL</option>')
+
     def test_historico_e_registrado_ao_editar_ferramenta(self):
         ferramenta = Ferramenta.objects.create(
             codigo="DSAFM-0001",
