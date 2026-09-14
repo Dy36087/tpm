@@ -46,7 +46,10 @@ IS_HEROKU = bool(os.environ.get("DYNO") or os.environ.get("HEROKU_APP_NAME"))
 DEBUG = os.environ.get("DJANGO_DEBUG", "0" if IS_HEROKU else "1") == "1"
 
 # Storage persistente de mídia (Heroku apaga arquivos locais a cada restart do dyno)
-USE_CLOUDINARY = CLOUDINARY_STORAGE_INSTALLED and bool(os.environ.get("CLOUDINARY_URL"))
+# Só ativa em produção (Heroku): localmente/testes continuam usando FileSystemStorage.
+USE_CLOUDINARY = (
+    CLOUDINARY_STORAGE_INSTALLED and IS_HEROKU and bool(os.environ.get("CLOUDINARY_URL"))
+)
 
 if IS_HEROKU:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ptm.settings")
@@ -243,6 +246,10 @@ STORAGES = {
         )
     },
 }
+
+# django-cloudinary-storage's collectstatic override still reads the legacy
+# STATICFILES_STORAGE setting, which Django's STORAGES dict no longer sets automatically.
+STATICFILES_STORAGE = STORAGES["staticfiles"]["BACKEND"]
 
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
