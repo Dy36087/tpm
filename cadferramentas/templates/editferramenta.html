@@ -25,6 +25,21 @@
         width: 95%;
         max-width: 1400px;
       }
+
+      .fotos-preview {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .fotos-preview img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border: 1px solid #d9e0e3;
+        border-radius: 5px;
+      }
       
       h2 {
         text-align: center;
@@ -387,6 +402,7 @@
       <div class="form-group">
         <label for="fotos">Adicionar novas fotos</label>
         <input type="file" id="fotos" name="fotos" accept="image/*" multiple />
+        <div id="fotos_preview" class="fotos-preview"></div>
       </div>
 
       <label>Descrição</label>
@@ -394,5 +410,22 @@
 
       <button type="submit">Salvar Alterações</button>
     </form>
+    <script>
+      const fotosInput = document.getElementById("fotos");
+      const fotosPreview = document.getElementById("fotos_preview");
+      fotosInput.addEventListener("change", function () {
+        const arquivos = Array.from(fotosInput.files).slice(0, 4);
+        const transferencia = new DataTransfer();
+        fotosPreview.innerHTML = "";
+        arquivos.forEach((arquivo) => {
+          transferencia.items.add(arquivo);
+          const imagem = document.createElement("img");
+          imagem.src = URL.createObjectURL(arquivo);
+          imagem.alt = "Pré-visualização da foto";
+          fotosPreview.appendChild(imagem);
+        });
+        fotosInput.files = transferencia.files;
+      });
+    </script>
   </body>
 </html>

@@ -75,6 +75,21 @@
       .logo-topo img {
         height: 120px;
       }
+
+      .fotos-preview {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .fotos-preview img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border: 1px solid #d9e0e3;
+        border-radius: 5px;
+      }
       @media (max-width: 768px) {
         body {
           display: block;
@@ -196,6 +211,7 @@
             accept="image/*"
             multiple
           />
+          <div id="fotos_preview" class="fotos-preview"></div>
         </div>
         <div class="form-group">
           <label for="descricao">Descrição</label
@@ -225,6 +241,8 @@
         const localSelect = document.getElementById("local");
         const localNovoGroup = document.getElementById("local_novo_group");
         const localNovoInput = document.getElementById("local_novo");
+        const fotosInput = document.getElementById("fotos");
+        const fotosPreview = document.getElementById("fotos_preview");
         function controlarPatrimonio() {
           const semPatrimonio = possuiPatrimonio.value === "nao";
           patrimonioDiv.style.display = semPatrimonio ? "none" : "block";
@@ -239,6 +257,19 @@
           localNovoGroup.style.display = novoLocal ? "block" : "none";
           if (!novoLocal) localNovoInput.value = "";
         }
+        fotosInput.addEventListener("change", function () {
+          const arquivos = Array.from(fotosInput.files).slice(0, 4);
+          const transferencia = new DataTransfer();
+          fotosPreview.innerHTML = "";
+          arquivos.forEach((arquivo) => {
+            transferencia.items.add(arquivo);
+            const imagem = document.createElement("img");
+            imagem.src = URL.createObjectURL(arquivo);
+            imagem.alt = "Pré-visualização da foto";
+            fotosPreview.appendChild(imagem);
+          });
+          fotosInput.files = transferencia.files;
+        });
         document
           .querySelectorAll('input[type="text"], textarea')
           .forEach((field) =>

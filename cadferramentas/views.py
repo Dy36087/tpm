@@ -296,7 +296,7 @@ def cadastrar_ferramenta(request):
             responsavel=responsavel,
         )
         ferramenta.save()
-        for imagem in request.FILES.getlist("fotos"):
+        for imagem in request.FILES.getlist("fotos")[:4]:
             FotoFerramenta.objects.create(ferramenta=ferramenta, imagem=imagem)
         return redirect("cadferramentas")
 
@@ -347,6 +347,15 @@ def historico_ferramenta(request, id):
         "historico_ferramenta.html",
         {"ferramenta": ferramenta, "historico": historico},
     )
+
+
+@nivel_acesso("ferramentas")
+def detalhes_ferramenta(request, id):
+    ferramenta = get_object_or_404(
+        Ferramenta.objects.select_related("responsavel").prefetch_related("fotos"),
+        id=id,
+    )
+    return render(request, "detalhes_ferramenta.html", {"ferramenta": ferramenta})
 
 
 @nivel_acesso("ferramentas")
@@ -421,7 +430,7 @@ def editar_ferramenta(request, id):
         ferramenta.responsavel = dados_novos["responsavel"]
 
         ferramenta.save()
-        for imagem in request.FILES.getlist("fotos"):
+        for imagem in request.FILES.getlist("fotos")[:4]:
             FotoFerramenta.objects.create(ferramenta=ferramenta, imagem=imagem)
 
         return redirect("listar_ferramentas")

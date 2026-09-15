@@ -393,7 +393,14 @@
 
       <div class="cards">
         {% for ferramenta in page_obj %}
-        <div class="card-ferramenta">
+        <div
+          class="card-ferramenta"
+          role="link"
+          tabindex="0"
+          data-detalhes-url="{% url 'detalhes_ferramenta' ferramenta.id %}"
+          onclick="abrirDetalhes(event, this)"
+          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); abrirDetalhes(event, this); }"
+        >
           <div class="codigo">{{ ferramenta.codigo }}</div>
 
           <h3>{{ ferramenta.nome }}</h3>
@@ -590,6 +597,15 @@
           ],
         },
       });
+    </script>
+
+    <script>
+      function abrirDetalhes(event, card) {
+        if (event.target.closest("a, button, form")) {
+          return;
+        }
+        window.location.href = card.dataset.detalhesUrl;
+      }
     </script>
   </body>
 </html>

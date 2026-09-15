@@ -60,6 +60,24 @@ class HistoricoFerramentaTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'value="OFICINA CENTRAL">OFICINA CENTRAL</option>')
 
+    def test_detalhes_ferramenta_exibe_informacoes_cadastradas(self):
+        ferramenta = Ferramenta.objects.create(
+            nome="Furadeira",
+            local="OFICINA CENTRAL",
+            patrimonio="PAT-123",
+            descricao="Furadeira de bancada",
+        )
+
+        client = Client()
+        client.force_login(self.user)
+
+        response = client.get(f"/ptmdsa/cadferramentas/detalhes/{ferramenta.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Furadeira")
+        self.assertContains(response, "OFICINA CENTRAL")
+        self.assertContains(response, "Furadeira de bancada")
+
     def test_historico_e_registrado_ao_editar_ferramenta(self):
         ferramenta = Ferramenta.objects.create(
             codigo="DSAFM-0001",
@@ -148,6 +166,29 @@ class HistoricoFerramentaTest(TestCase):
         ferramenta = Ferramenta.objects.latest("id")
         self.assertEqual(
             FotoFerramenta.objects.filter(ferramenta=ferramenta).count(), 1
+        )
+
+    def test_cadastrar_ferramenta_salva_no_maximo_quatro_fotos(self):
+        client = Client()
+        client.force_login(self.user)
+        fotos = [
+            SimpleUploadedFile(
+                f"ferramenta-{numero}.jpg",
+                b"fake-image-content",
+                content_type="image/jpeg",
+            )
+            for numero in range(5)
+        ]
+
+        response = client.post(
+            "/ptmdsa/cadferramentas/cadastrar_ferramenta/",
+            {"nome": "Alicate", "fotos": fotos},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        ferramenta = Ferramenta.objects.latest("id")
+        self.assertEqual(
+            FotoFerramenta.objects.filter(ferramenta=ferramenta).count(), 4
         )
 
     def test_editar_ferramenta_adiciona_fotos(self):
