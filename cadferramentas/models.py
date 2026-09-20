@@ -30,6 +30,16 @@ class HistoricoAlteracaoFerramenta(models.Model):
         return f"{self.ferramenta.codigo} - {self.campo}"
 
 
+class LocalFerramenta(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        ordering = ["nome"]
+
+    def __str__(self):
+        return self.nome
+
+
 class Ferramenta(models.Model):
     codigo = models.CharField(max_length=16, unique=True, blank=True, default="")
     possui_patrimonio = models.CharField(max_length=10, default="sim", blank=True)
@@ -38,6 +48,9 @@ class Ferramenta(models.Model):
     fabricante = models.CharField(max_length=100, blank=True)
     nome = models.CharField(max_length=100)
     data_aquisicao = models.DateField(blank=True, null=True)
+    valor_aquisicao = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True
+    )
     estado = models.CharField(max_length=50, blank=True)
     local = models.CharField(max_length=100, blank=True)
     descricao = models.TextField(blank=True, null=True)
@@ -54,6 +67,12 @@ class Ferramenta(models.Model):
         if not self.codigo:
             self.codigo = self._next_codigo()
         super().save(*args, **kwargs)
+        if self.local and self.local not in {
+            "COFEN",
+            "CAESB",
+            "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)",
+        }:
+            LocalFerramenta.objects.get_or_create(nome=self.local)
 
     @classmethod
     def _next_codigo(cls):

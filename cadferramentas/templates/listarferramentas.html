@@ -343,6 +343,17 @@
     <form method="get" class="filtros">
       <div class="row">
         <div class="form-group">
+          <label for="nome">Nome da ferramenta</label>
+          <input
+            type="search"
+            id="nome"
+            name="nome"
+            value="{{ nome_filtro }}"
+            placeholder="Digite o nome da ferramenta"
+          />
+        </div>
+
+        <div class="form-group">
           <label>Local</label>
 
           <select name="local">
@@ -460,35 +471,19 @@
       </div>
 
       <section class="hero">
-        <div class="acoes">
-          <a href="/ptmdsa/cadptm/" class="btn-primary"
-            >Ir para Cadastro de Patrimônio</a
-          >
-          <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary"
-            >Pesquisa Patrimonio</a
-          >
-          <a href="/ptmdsa/cadferramentas/" class="btn-primary"
-            >Cadastro de Ferramentas</a
-          >
-          <a
-            href="/ptmdsa/cadferramentas/listar_ferramentas/"
-            class="btn-primary"
-            >Ferramentas Cadastradas</a
-          >
-          <a href="/ptmdsa/" class="btn-primary">Pagina Inicial</a>
-        </div>
+        {% include 'partials/system_access_buttons.html' %}
       </section>
     </div>
 
     <div class="pagination">
       {% if page_obj.has_previous %}
       <a
-        href="?page=1{% if local_selecionado %}&local={{ local_selecionado }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}"
+        href="?page=1{% if nome_filtro %}&nome={{ nome_filtro|urlencode }}{% endif %}{% if local_selecionado %}&local={{ local_selecionado|urlencode }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada|urlencode }}{% endif %}"
       >
         Primeira
       </a>
       <a
-        href="?page={{ page_obj.previous_page_number }}{% if local_selecionado %}&local={{ local_selecionado }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}"
+        href="?page={{ page_obj.previous_page_number }}{% if nome_filtro %}&nome={{ nome_filtro|urlencode }}{% endif %}{% if local_selecionado %}&local={{ local_selecionado|urlencode }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada|urlencode }}{% endif %}"
       >
         Anterior
       </a>
@@ -500,12 +495,12 @@
 
       {% if page_obj.has_next %}
       <a
-        href="?page={{ page_obj.next_page_number }}{% if local_selecionado %}&local={{ local_selecionado }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}"
+        href="?page={{ page_obj.next_page_number }}{% if nome_filtro %}&nome={{ nome_filtro|urlencode }}{% endif %}{% if local_selecionado %}&local={{ local_selecionado|urlencode }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada|urlencode }}{% endif %}"
       >
         Próxima
       </a>
       <a
-        href="?page={{ page_obj.paginator.num_pages }}{% if local_selecionado %}&local={{ local_selecionado }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}"
+        href="?page={{ page_obj.paginator.num_pages }}{% if nome_filtro %}&nome={{ nome_filtro|urlencode }}{% endif %}{% if local_selecionado %}&local={{ local_selecionado|urlencode }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada|urlencode }}{% endif %}"
       >
         Última
       </a>
@@ -522,15 +517,12 @@
         <p>Total</p>
       </div>
 
+      {% for local in por_local %}
       <div class="kpi">
-        <h2>{{ total_cofen }}</h2>
-        <p>COFEN</p>
+        <h2>{{ local.total }}</h2>
+        <p>{% if local.local %}{{ local.local }}{% else %}Sem local{% endif %}</p>
       </div>
-
-      <div class="kpi">
-        <h2>{{ total_caesb }}</h2>
-        <p>CAESB</p>
-      </div>
+      {% endfor %}
     </div>
 
     <canvas id="graficoCategoria"></canvas>
@@ -544,24 +536,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-      const dadosCategoria = JSON.parse(
-        document.getElementById("dados_categoria").textContent,
-      );
-
-      new Chart(document.getElementById("graficoLocal"), {
-        type: "pie",
-        data: {
-          labels: ["COFEN", "CAESB"],
-          datasets: [
-            {
-              data: [15, 24],
-            },
-          ],
-        },
-      });
-    </script>
-
-    <script>
       const locais = JSON.parse(
         document.getElementById("dados_local").textContent,
       );
@@ -572,9 +546,27 @@
           labels: locais.map((item) => item.local),
           datasets: [
             {
+              label: "Ferramentas por local",
               data: locais.map((item) => item.total),
+              backgroundColor: [
+                "#0078D4",
+                "#198754",
+                "#ffc107",
+                "#dc3545",
+                "#6f42c1",
+                "#20c997",
+              ],
             },
           ],
+        },
+        options: {
+          plugins: {
+            legend: { position: "right" },
+            title: {
+              display: true,
+              text: "Ferramentas por local",
+            },
+          },
         },
       });
     </script>

@@ -1,6 +1,12 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .models import FotoFerramenta, Ferramenta, HistoricoAlteracaoFerramenta
+from .models import (
+    FotoFerramenta,
+    Ferramenta,
+    HistoricoAlteracaoFerramenta,
+    LocalFerramenta,
+)
 from django.shortcuts import get_object_or_404
 from pontoele.models import Servidor
 from django.http import HttpResponse
@@ -153,13 +159,7 @@ def cadferramentas(request):
         "CAESB",
         "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)",
     ]
-    locais_cadastrados = list(
-        Ferramenta.objects.values_list("local", flat=True)
-        .exclude(local="")
-        .exclude(local__in=locais_padrao)
-        .distinct()
-        .order_by("local")
-    )
+    locais_cadastrados = LocalFerramenta.objects.all()
 
     return render(
         request,
@@ -172,11 +172,30 @@ def cadferramentas(request):
 
 
 @nivel_acesso("ferramentas")
+@require_POST
+def excluir_local(request, id):
+    local = get_object_or_404(LocalFerramenta, id=id)
+    if Ferramenta.objects.filter(local=local.nome).exists():
+        messages.error(
+            request,
+            "Este local ainda está associado a uma ferramenta e não pode ser excluído.",
+        )
+    else:
+        local.delete()
+        messages.success(request, "Local excluído com sucesso.")
+    return redirect("cadferramentas")
+
+
+@nivel_acesso("ferramentas")
 def listar_ferramentas(request):
 
     ferramentas = Ferramenta.objects.all().order_by("codigo")
+    nome_filtro = request.GET.get("nome", "").strip()
     local_filtro = request.GET.get("local")
     categoria = request.GET.get("categoria")
+
+    if nome_filtro:
+        ferramentas = ferramentas.filter(nome__icontains=nome_filtro)
 
     if local_filtro:
         ferramentas = ferramentas.filter(local=local_filtro)
@@ -205,6 +224,7 @@ def listar_ferramentas(request):
         "listarferramentas.html",
         {
             "page_obj": page_obj,
+            "nome_filtro": nome_filtro,
             "local_selecionado": local_filtro,
             "categoria_selecionada": categoria,
             "total_ferramentas": total_ferramentas,
@@ -266,11 +286,13 @@ def cadastrar_ferramenta(request):
         fabricante = request.POST.get("fabricante", "").strip().upper()
         nome = request.POST.get("nome", "").strip().upper()
         data_aquisicao = request.POST.get("data_aquisicao", "").strip()
+        valor_aquisicao = request.POST.get("valor_aquisicao", "").strip()
         estado = request.POST.get("estado", "").strip().upper()
         local = request.POST.get("local", "").strip().upper()
         local_novo = request.POST.get("local_novo", "").strip().upper()
         if local == "NOVO_LOCAL":
             local = local_novo or "OUTRO"
+            LocalFerramenta.objects.get_or_create(nome=local)
         descricao = request.POST.get("descricao", "").strip().upper()
         responsavel = None
 
@@ -290,6 +312,7 @@ def cadastrar_ferramenta(request):
             fabricante=fabricante,
             nome=nome,
             data_aquisicao=data_aquisicao if data_aquisicao else None,
+            valor_aquisicao=valor_aquisicao if valor_aquisicao else None,
             estado=estado,
             local=local,
             descricao=descricao,
@@ -319,6 +342,7 @@ def _registrar_historico_ferramenta(ferramenta, dados_novos, usuario):
         "fabricante",
         "nome",
         "data_aquisicao",
+        "valor_aquisicao",
         "estado",
         "local",
         "descricao",
@@ -373,6 +397,7 @@ def editar_ferramenta(request, id):
                 "fabricante",
                 "nome",
                 "data_aquisicao",
+                "valor_aquisicao",
                 "estado",
                 "local",
                 "descricao",
@@ -383,6 +408,7 @@ def editar_ferramenta(request, id):
 
         possui_patrimonio = request.POST.get("possui_patrimonio", "sim").strip().lower()
         patrimonio = request.POST.get("patrimonio", "").strip().upper()
+        valor_aquisicao = request.POST.get("valor_aquisicao", "").strip()
 
         if possui_patrimonio == "nao":
             patrimonio = "SEM_PATRIMONIO"
@@ -393,6 +419,7 @@ def editar_ferramenta(request, id):
         local_novo = request.POST.get("local_novo", "").strip().upper()
         if local == "NOVO_LOCAL":
             local = local_novo or "OUTRO"
+            LocalFerramenta.objects.get_or_create(nome=local)
 
         responsavel_id = request.POST.get("responsavel", "").strip()
         responsavel = (
@@ -408,6 +435,7 @@ def editar_ferramenta(request, id):
             "categoria": request.POST.get("categoria", ""),
             "fabricante": request.POST.get("fabricante", ""),
             "data_aquisicao": request.POST.get("data_aquisicao") or None,
+            "valor_aquisicao": valor_aquisicao or None,
             "estado": request.POST.get("estado", ""),
             "local": local,
             "descricao": request.POST.get("descricao", ""),
@@ -423,6 +451,7 @@ def editar_ferramenta(request, id):
         ferramenta.categoria = dados_novos["categoria"]
         ferramenta.fabricante = dados_novos["fabricante"]
         ferramenta.data_aquisicao = dados_novos["data_aquisicao"]
+        ferramenta.valor_aquisicao = dados_novos["valor_aquisicao"]
         ferramenta.estado = dados_novos["estado"]
         ferramenta.local = dados_novos["local"]
         ferramenta.descricao = dados_novos["descricao"]
@@ -447,19 +476,7 @@ def editar_ferramenta(request, id):
         {
             "ferramenta": ferramenta,
             "local_custom": local_custom,
-            "locais_cadastrados": list(
-                Ferramenta.objects.values_list("local", flat=True)
-                .exclude(local="")
-                .exclude(
-                    local__in=[
-                        "COFEN",
-                        "CAESB",
-                        "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)",
-                    ]
-                )
-                .distinct()
-                .order_by("local")
-            ),
+            "locais_cadastrados": LocalFerramenta.objects.all(),
             "servidores": Servidor.objects.all().order_by("nome"),
         },
     )

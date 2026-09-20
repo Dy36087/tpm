@@ -114,6 +114,7 @@
   </head>
   <body>
     {% include 'partials/user_status.html' %}
+    {% include 'partials/system_access_buttons.html' %}
     <main class="detalhes-container">
       <div class="cabecalho-detalhes">
         <div>
@@ -131,6 +132,7 @@
         <div class="informacao"><strong>Estado</strong>{{ ferramenta.estado }}</div>
         <div class="informacao"><strong>Local</strong>{{ ferramenta.local }}</div>
         <div class="informacao"><strong>Data de aquisição</strong>{{ ferramenta.data_aquisicao|default:"Não informada" }}</div>
+        <div class="informacao"><strong>Valor de aquisição</strong>{% if ferramenta.valor_aquisicao is not None %}R$ {{ ferramenta.valor_aquisicao|floatformat:2 }}{% else %}Não informado{% endif %}</div>
         <div class="informacao"><strong>Responsável</strong>{{ ferramenta.responsavel.nome|default:"Não informado" }}</div>
         <div class="informacao"><strong>Matrícula</strong>{{ ferramenta.responsavel.matricula|default:"Não informada" }}</div>
       </div>

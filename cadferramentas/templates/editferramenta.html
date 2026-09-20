@@ -305,6 +305,7 @@
   </head>
   <body>
     {% include 'partials/user_status.html' %}
+    {% include 'partials/system_access_buttons.html' %}
     <h2>PTM - DSA - EDITAR FERRAMENTAS</h2>
 
     <form method="post" enctype="multipart/form-data">
@@ -315,39 +316,64 @@
           const localSelect = document.getElementById('local')
           const localNovoGroup = document.getElementById('local_novo_group')
           const localNovoInput = document.getElementById('local_novo')
+          const patrimonioSelect = document.getElementById('possui_patrimonio')
+          const patrimonioGroup = document.getElementById('patrimonio_group')
+          const patrimonioInput = document.getElementById('patrimonio')
 
           function controlarLocal() {
             const mostrarCampoNovoLocal = localSelect && localSelect.value === 'NOVO_LOCAL'
             if (localNovoGroup) {
               localNovoGroup.style.display = mostrarCampoNovoLocal ? 'block' : 'none'
             }
+            if (localNovoInput) {
+              localNovoInput.required = mostrarCampoNovoLocal
+            }
             if (localNovoInput && !mostrarCampoNovoLocal) {
               localNovoInput.value = ''
+            }
+          }
+
+          function controlarPatrimonio() {
+            const possuiPatrimonio = patrimonioSelect && patrimonioSelect.value === 'sim'
+            if (patrimonioGroup) {
+              patrimonioGroup.style.display = possuiPatrimonio ? 'block' : 'none'
+            }
+            if (patrimonioInput) {
+              patrimonioInput.required = possuiPatrimonio
             }
           }
 
           if (localSelect) {
             localSelect.addEventListener('change', controlarLocal)
           }
+          if (patrimonioSelect) {
+            patrimonioSelect.addEventListener('change', controlarPatrimonio)
+          }
           controlarLocal()
+          controlarPatrimonio()
         })
       </script>
 
       <label>Nome</label>
-      <input type="text" name="nome" value="{{ ferramenta.nome }}" />
+      <input type="text" name="nome" value="{{ ferramenta.nome }}" required />
 
       <div class="form-group">
         <label for="possui_patrimonio">Possui Patrimônio?</label>
-        <select id="possui_patrimonio" name="possui_patrimonio">
+        <select id="possui_patrimonio" name="possui_patrimonio" required>
           <option value="sim" {% if ferramenta.possui_patrimonio == "sim" %}selected{% endif %}>Sim</option>
           <option value="nao" {% if ferramenta.possui_patrimonio == "nao" %}selected{% endif %}>Não</option>
         </select>
       </div>
 
+      <div class="form-group" id="patrimonio_group">
+        <label for="patrimonio">Patrimônio</label>
+        <input id="patrimonio" type="text" name="patrimonio" value="{{ ferramenta.patrimonio }}" required />
+      </div>
+
       <div class="row">
           <div class="form-group">
             <label for="categoria">Categoria</label>
-            <select id="categoria" name="categoria">
+            <select id="categoria" name="categoria" required>
               <option value="MANUAL" {% if ferramenta.categoria == "MANUAL" %}selected{% endif %}>MANUAL</option>
               <option value="ELÉTRICA" {% if ferramenta.categoria == "ELÉTRICA" %}selected{% endif %}>ELÉTRICA</option>
               <option value="PNEUMÁTICA" {% if ferramenta.categoria == "PNEUMÁTICA" %}selected{% endif %}>PNEUMÁTICA</option>
@@ -358,11 +384,22 @@
       </div>
 
       <label>Fabricante</label>
-      <input type="text" name="fabricante" value="{{ ferramenta.fabricante }}" />
+      <input type="text" name="fabricante" value="{{ ferramenta.fabricante }}" required />
+
+      <div class="row">
+        <div class="form-group">
+          <label for="data_aquisicao">Data de Aquisição</label>
+          <input type="date" id="data_aquisicao" name="data_aquisicao" value="{{ ferramenta.data_aquisicao|date:'Y-m-d' }}" required />
+        </div>
+        <div class="form-group">
+          <label for="valor_aquisicao">Valor de Aquisição</label>
+          <input type="number" id="valor_aquisicao" name="valor_aquisicao" min="0" step="0.01" value="{{ ferramenta.valor_aquisicao|default_if_none:'' }}" placeholder="0,00" required />
+        </div>
+      </div>
 
       <div class="form-group">
           <label for="local">Local</label>
-          <select id="local" name="local">
+          <select id="local" name="local" required>
             <option value="COFEN" {% if ferramenta.local == "COFEN" %}selected{% endif %}>COFEN</option>
             <option value="CAESB" {% if ferramenta.local == "CAESB" %}selected{% endif %}>CAESB</option>
             <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" {% if ferramenta.local == "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" %}selected{% endif %}>VIAGEM (ESPECIFICAR NA DESCRIÇÃO)</option>
@@ -375,12 +412,12 @@
 
       <div class="form-group" id="local_novo_group" style="display: none;">
         <label for="local_novo">Novo Local</label>
-        <input type="text" id="local_novo" name="local_novo" maxlength="100" value="{% if local_custom %}{{ ferramenta.local }}{% endif %}" placeholder="Digite o nome do local" />
+        <input type="text" id="local_novo" name="local_novo" maxlength="100" value="{% if local_custom %}{{ ferramenta.local }}{% endif %}" placeholder="Digite o nome do local" required />
       </div>
 
       <div class="form-group">
         <label for="estado">Estado</label>
-        <select id="estado" name="estado">
+        <select id="estado" name="estado" required>
           <option value="NOVO" {% if ferramenta.estado == "NOVO" %}selected{% endif %}>NOVO</option>
           <option value="BOM" {% if ferramenta.estado == "BOM" %}selected{% endif %}>BOM</option>
           <option value="REGULAR" {% if ferramenta.estado == "REGULAR" %}selected{% endif %}>REGULAR</option>
@@ -406,7 +443,7 @@
       </div>
 
       <label>Descrição</label>
-      <textarea name="descricao">{{ ferramenta.descricao }}</textarea>
+      <textarea name="descricao" required>{{ ferramenta.descricao }}</textarea>
 
       <button type="submit">Salvar Alterações</button>
     </form>

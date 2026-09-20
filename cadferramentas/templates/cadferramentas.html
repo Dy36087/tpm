@@ -90,6 +90,38 @@
         border: 1px solid #d9e0e3;
         border-radius: 5px;
       }
+
+      .locais-gerenciados {
+        margin-top: 20px;
+        padding: 16px;
+        border: 1px solid #d9e0e3;
+        border-radius: 8px;
+        background: #f8fafb;
+      }
+
+      .local-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e3e8eb;
+      }
+
+      .local-item:last-child {
+        border-bottom: 0;
+      }
+
+      .local-item form {
+        margin: 0;
+      }
+
+      .btn-excluir-local {
+        width: auto;
+        padding: 6px 10px;
+        background: #c62828;
+        font-size: 12px;
+      }
       @media (max-width: 768px) {
         body {
           display: block;
@@ -112,6 +144,11 @@
         <img src="{% static 'principal/img/logo.png' %}" alt="Logo" />
       </div>
       <h2>PTM - DSA - FERRAMENTAS</h2>
+      {% if messages %}
+      {% for message in messages %}
+      <div class="form-group">{{ message }}</div>
+      {% endfor %}
+      {% endif %}
       <form
         method="post"
         enctype="multipart/form-data"
@@ -120,7 +157,7 @@
         {% csrf_token %}
         <div class="form-group">
           <label>A ferramenta possui patrimônio?</label
-          ><select id="possui_patrimonio" name="possui_patrimonio">
+          ><select id="possui_patrimonio" name="possui_patrimonio" required>
             <option value="sim">Sim</option>
             <option value="nao">Não</option>
           </select>
@@ -128,7 +165,7 @@
         <div class="row" id="patrimonio_div">
           <div class="form-group">
             <label for="patrimonio">Patrimônio</label
-            ><input type="text" id="patrimonio" name="patrimonio" />
+            ><input type="text" id="patrimonio" name="patrimonio" required />
           </div>
         </div>
         <div class="form-group">
@@ -138,7 +175,7 @@
         <div class="row">
           <div class="form-group">
             <label for="categoria">Categoria</label
-            ><select id="categoria" name="categoria">
+            ><select id="categoria" name="categoria" required>
               <option value="MANUAL">MANUAL</option>
               <option value="ELÉTRICA">ELÉTRICA</option>
               <option value="PNEUMÁTICA">PNEUMÁTICA</option>
@@ -148,17 +185,29 @@
           </div>
           <div class="form-group">
             <label for="fabricante">Fabricante</label
-            ><input type="text" id="fabricante" name="fabricante" />
+            ><input type="text" id="fabricante" name="fabricante" required />
           </div>
         </div>
         <div class="row">
           <div class="form-group">
             <label for="data_aquisicao">Data de Aquisição</label
-            ><input type="date" id="data_aquisicao" name="data_aquisicao" />
+            ><input type="date" id="data_aquisicao" name="data_aquisicao" required />
+          </div>
+          <div class="form-group">
+            <label for="valor_aquisicao">Valor da Ferramenta</label
+            ><input
+              type="number"
+              id="valor_aquisicao"
+              name="valor_aquisicao"
+              min="0"
+              step="0.01"
+              placeholder="0,00"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="estado">Estado</label
-            ><select id="estado" name="estado">
+            ><select id="estado" name="estado" required>
               <option value="NOVO">NOVO</option>
               <option value="BOM">BOM</option>
               <option value="REGULAR">REGULAR</option>
@@ -169,7 +218,7 @@
         </div>
         <div class="form-group">
           <label for="local">Local</label
-          ><select id="local" name="local">
+          ><select id="local" name="local" required>
             <option value="COFEN">COFEN</option>
             <option value="CAESB">CAESB</option>
             <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)">
@@ -189,6 +238,7 @@
             name="local_novo"
             maxlength="100"
             placeholder="Digite o nome do local"
+            required
           />
         </div>
         <div class="form-group">
@@ -210,29 +260,32 @@
             name="fotos"
             accept="image/*"
             multiple
+            required
           />
           <div id="fotos_preview" class="fotos-preview"></div>
         </div>
         <div class="form-group">
           <label for="descricao">Descrição</label
-          ><textarea id="descricao" name="descricao" rows="4"></textarea>
+          ><textarea id="descricao" name="descricao" rows="4" required></textarea>
         </div>
         <button type="submit">Cadastrar Ferramenta</button>
-        <section class="hero">
-          <div class="button-row">
-            <a href="/ptmdsa/cadptm/" class="btn-primary"
-              >Ir para Cadastro de Patrimônio</a
-            >
-            <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary"
-              >Pesquisa Patrimonio</a
-            >
-            <a href="/ptmdsa/" class="btn-primary"
-              >Voltar para Página Inicial</a
-            >
-          </div>
-        </section>
+        {% include 'partials/system_access_buttons.html' %}
       </form>
     </div>
+    <section class="locais-gerenciados">
+      <h3>Locais cadastrados</h3>
+      {% for local_cadastrado in locais_cadastrados %}
+      <div class="local-item">
+        <span>{{ local_cadastrado.nome }}</span>
+        <form method="post" action="{% url 'excluir_local' local_cadastrado.id %}">
+          {% csrf_token %}
+          <button class="btn-excluir-local" type="submit">Excluir</button>
+        </form>
+      </div>
+      {% empty %}
+      <p>Nenhum local personalizado cadastrado.</p>
+      {% endfor %}
+    </section>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const possuiPatrimonio = document.getElementById("possui_patrimonio");
@@ -246,6 +299,7 @@
         function controlarPatrimonio() {
           const semPatrimonio = possuiPatrimonio.value === "nao";
           patrimonioDiv.style.display = semPatrimonio ? "none" : "block";
+          patrimonioInput.required = !semPatrimonio;
           patrimonioInput.value = semPatrimonio
             ? "sem_patrimonio"
             : patrimonioInput.value === "sem_patrimonio"
@@ -255,6 +309,7 @@
         function controlarLocal() {
           const novoLocal = localSelect.value === "NOVO_LOCAL";
           localNovoGroup.style.display = novoLocal ? "block" : "none";
+          localNovoInput.required = novoLocal;
           if (!novoLocal) localNovoInput.value = "";
         }
         fotosInput.addEventListener("change", function () {
