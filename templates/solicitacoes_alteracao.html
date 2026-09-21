@@ -1,0 +1,61 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitações de alteração</title>
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
+    <style>
+      body { margin: 0; padding: 24px; background: #f4f6f9; font-family: Arial, sans-serif; }
+      .container { width: min(1100px, 100%); margin: 0 auto; background: #fff; padding: 24px; border-radius: 8px; }
+      .solicitacao { padding: 16px 0; border-bottom: 1px solid #d9e0e3; }
+      .solicitacao:last-child { border-bottom: 0; }
+      .meta { color: #52606d; margin: 6px 0 12px; }
+      .dados { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-bottom: 12px; }
+      .dado { padding: 8px; background: #f8fafb; }
+      .acoes { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; }
+      .acoes form { display: flex; gap: 8px; align-items: end; }
+      textarea { min-width: 220px; min-height: 36px; }
+      button { padding: 8px 12px; border: 0; border-radius: 4px; color: white; cursor: pointer; }
+      .aprovar { background: #198754; }
+      .rejeitar { background: #c62828; }
+      .tag { font-weight: bold; color: #1d4ed8; }
+    </style>
+  </head>
+  <body>
+    {% include 'partials/user_status.html' %}
+    {% include 'partials/system_access_buttons.html' %}
+    <main class="container">
+      <h1>Solicitações de alteração</h1>
+      {% if messages %}
+        {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+      {% endif %}
+      {% for solicitacao in solicitacoes %}
+        <article class="solicitacao">
+          <div class="tag">{{ solicitacao.get_tipo_display }} #{{ solicitacao.objeto_id }}</div>
+          <div class="meta">Solicitada por {{ solicitacao.solicitante.username|default:'Usuário removido' }} em {{ solicitacao.criada_em|date:'d/m/Y H:i' }}</div>
+          <div class="dados">
+            {% for campo, valor in solicitacao.dados.items %}
+              <div class="dado"><strong>{{ campo }}:</strong> {{ valor|default:'-' }}</div>
+            {% endfor %}
+          </div>
+          {% if solicitacao.status == 'pendente' %}
+            <div class="acoes">
+              <form method="post" action="{% url 'avaliar_solicitacao' solicitacao.id %}">
+                {% csrf_token %}
+                <input type="text" name="observacao" placeholder="Observação (opcional)" />
+                <button class="aprovar" name="decisao" value="aprovar">Aprovar</button>
+                <button class="rejeitar" name="decisao" value="rejeitar">Rejeitar</button>
+              </form>
+            </div>
+          {% else %}
+            <div class="meta">Status: {{ solicitacao.get_status_display }}</div>
+          {% endif %}
+        </article>
+      {% empty %}
+        <p>Nenhuma solicitação de alteração.</p>
+      {% endfor %}
+    </main>
+  </body>
+</html>

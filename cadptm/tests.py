@@ -13,6 +13,8 @@ class HistoricoPatrimonioTest(TestCase):
         )
 
     def test_historico_e_registrado_ao_editar_item(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
         item = Patrimonio.objects.create(
             tipo="proprio",
             codigo="COD-001",

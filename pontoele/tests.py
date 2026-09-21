@@ -50,11 +50,11 @@ class CadastrarFaceTests(TestCase):
 
 class GerenciarServidorTests(TestCase):
     def setUp(self):
-        usuario = get_user_model().objects.create_user(
+        self.usuario = get_user_model().objects.create_user(
             username="gestor", password="senha-segura"
         )
-        usuario.groups.add(grupos_de_acesso()["Ponto Eletrônico"])
-        self.client.force_login(usuario)
+        self.usuario.groups.add(grupos_de_acesso()["Ponto Eletrônico"])
+        self.client.force_login(self.usuario)
         self.servidor = Servidor.objects.create(
             matricula="DSAF0001",
             nome="Maria Souza",
@@ -71,6 +71,8 @@ class GerenciarServidorTests(TestCase):
         )
 
     def test_editar_servidor_atualiza_registro(self):
+        self.usuario.is_staff = True
+        self.usuario.save(update_fields=["is_staff"])
         response = self.client.post(
             reverse("editar_servidor", args=[self.servidor.id]),
             {

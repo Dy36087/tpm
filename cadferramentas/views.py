@@ -12,7 +12,8 @@ from pontoele.models import Servidor
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from principal.access import nivel_acesso
+from principal.access import nivel_acesso, usuario_administrador
+from principal.views import criar_solicitacao_alteracao
 from django.views.decorators.http import require_POST
 
 try:
@@ -442,6 +443,23 @@ def editar_ferramenta(request, id):
             "observacao": request.POST.get("observacao", ""),
             "responsavel": responsavel,
         }
+
+        if not usuario_administrador(request.user):
+            criar_solicitacao_alteracao(
+                "ferramenta",
+                ferramenta.id,
+                {
+                    **{
+                        campo: dados_novos[campo]
+                        for campo in dados_novos
+                        if campo != "responsavel"
+                    },
+                    "responsavel_id": responsavel.id if responsavel else None,
+                },
+                request.user,
+            )
+            messages.info(request, "Alteração enviada para avaliação do administrador.")
+            return redirect("listar_ferramentas")
 
         _registrar_historico_ferramenta(ferramenta, dados_novos, request.user)
 

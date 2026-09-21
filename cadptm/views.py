@@ -15,7 +15,8 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from principal.access import nivel_acesso
+from principal.access import nivel_acesso, usuario_administrador
+from principal.views import criar_solicitacao_alteracao
 
 from .forms import PatrimonioForm
 from .models import (
@@ -440,6 +441,16 @@ def editar_item(request, id):
         }
 
         if form.is_valid():
+            if not usuario_administrador(request.user):
+                dados = {
+                    campo: valor.isoformat() if hasattr(valor, "isoformat") else valor
+                    for campo, valor in form.cleaned_data.items()
+                }
+                criar_solicitacao_alteracao(
+                    "patrimonio", item.id, dados, request.user
+                )
+                messages.info(request, "Alteração enviada para avaliação do administrador.")
+                return redirect("pesquisar")
             _registrar_historico_alteracao(item, form, request.user, valores_anteriores)
             form.save()
             messages.success(request, "PATRIMÔNIO ATUALIZADO COM SUCESSO!")

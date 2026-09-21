@@ -7,6 +7,7 @@ from django.test import Client, SimpleTestCase, TestCase
 
 from .models import FotoFerramenta, Ferramenta, LocalFerramenta
 from principal.access import grupos_de_acesso
+from principal.models import SolicitacaoAlteracao
 from pontoele.models import Servidor
 
 
@@ -149,6 +150,8 @@ class HistoricoFerramentaTest(TestCase):
         self.assertContains(response, "Furadeira de bancada")
 
     def test_historico_e_registrado_ao_editar_ferramenta(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
         ferramenta = Ferramenta.objects.create(
             codigo="DSAFM-0001",
             patrimonio="SEM_PATRIMONIO",
@@ -185,6 +188,8 @@ class HistoricoFerramentaTest(TestCase):
         self.assertIn("nome", [h.campo for h in ferramenta.historicos.all()])
 
     def test_editar_ferramenta_atualiza_responsavel(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
         servidor = Servidor.objects.create(
             matricula="DSAF0099",
             nome="Responsável Teste",
@@ -262,6 +267,8 @@ class HistoricoFerramentaTest(TestCase):
         )
 
     def test_editar_ferramenta_adiciona_fotos(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
         ferramenta = Ferramenta.objects.create(nome="Chave", local="COFEN")
         foto = SimpleUploadedFile(
             "nova-foto.jpg", b"fake-image-content", content_type="image/jpeg"
@@ -276,6 +283,34 @@ class HistoricoFerramentaTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertTrue(FotoFerramenta.objects.filter(ferramenta=ferramenta).exists())
+
+    def test_usuario_comum_solicita_alteracao_e_administrador_aprova(self):
+        ferramenta = Ferramenta.objects.create(nome="Chave", local="COFEN")
+        client = Client()
+        client.force_login(self.user)
+        response = client.post(
+            f"/ptmdsa/cadferramentas/editar/{ferramenta.id}/",
+            {"nome": "Chave Atualizada", "local": "COFEN"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        ferramenta.refresh_from_db()
+        self.assertEqual(ferramenta.nome, "Chave")
+        solicitacao = SolicitacaoAlteracao.objects.get(objeto_id=ferramenta.id)
+        self.assertEqual(solicitacao.status, SolicitacaoAlteracao.STATUS_PENDENTE)
+
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        response = client.post(
+            f"/ptmdsa/solicitacoes/{solicitacao.id}/avaliar/",
+            {"decisao": "aprovar"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        ferramenta.refresh_from_db()
+        solicitacao.refresh_from_db()
+        self.assertEqual(ferramenta.nome, "Chave Atualizada")
+        self.assertEqual(solicitacao.status, SolicitacaoAlteracao.STATUS_APROVADA)
 
     def test_excluir_ferramenta_remove_registro(self):
         ferramenta = Ferramenta.objects.create(

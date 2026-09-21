@@ -15,6 +15,7 @@ from principal.access import (
     nivel_acesso,
     usuario_administrador,
 )
+from principal.views import criar_solicitacao_alteracao
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import RegistroPonto, Servidor
@@ -383,6 +384,17 @@ def listar_servidores(request):
 def editar_servidor(request, servidor_id):
     servidor = get_object_or_404(Servidor, id=servidor_id)
     if request.method == "POST":
+        dados = {
+            campo: request.POST.get(campo, "").strip()
+            for campo in [
+                "nome", "cpf", "rg", "data_nascimento", "email", "telefone",
+                "cep", "endereco", "bairro", "cidade", "uf",
+            ]
+        }
+        if not usuario_administrador(request.user):
+            criar_solicitacao_alteracao("servidor", servidor.id, dados, request.user)
+            messages.info(request, "Alteração enviada para avaliação do administrador.")
+            return redirect("listar_servidores")
         for campo in [
             "nome",
             "cpf",
