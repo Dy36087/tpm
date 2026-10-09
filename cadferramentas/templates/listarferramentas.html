@@ -143,6 +143,16 @@
         transition: all 0.3s ease;
       }
 
+      .card-ferramenta.manutencao {
+        background: #f5f24b;
+        border-left-color: #ffc107;
+      }
+
+      .card-ferramenta.inutilizado {
+        background: #fd4353;
+        border-left-color: #dc3545;
+      }
+
       .btn-editar {
         display: block;
         text-align: center;
@@ -405,7 +415,7 @@
       <div class="cards">
         {% for ferramenta in page_obj %}
         <div
-          class="card-ferramenta"
+          class="card-ferramenta{% if ferramenta.estado == 'MANUTENCAO' %} manutencao{% elif ferramenta.estado == 'INUTILIZADO' %} inutilizado{% endif %}"
           role="link"
           tabindex="0"
           data-detalhes-url="{% url 'detalhes_ferramenta' ferramenta.id %}"

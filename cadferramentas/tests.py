@@ -187,6 +187,42 @@ class HistoricoFerramentaTest(TestCase):
         self.assertTrue(ferramenta.historicos.exists())
         self.assertIn("nome", [h.campo for h in ferramenta.historicos.all()])
 
+    def test_edicao_carrega_e_preserva_dados_de_aquisicao(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        ferramenta = Ferramenta.objects.create(
+            nome="Furadeira",
+            data_aquisicao="2024-03-01",
+            valor_aquisicao=Decimal("1250.75"),
+            local="COFEN",
+        )
+
+        client = Client()
+        client.force_login(self.user)
+        url = f"/ptmdsa/cadferramentas/editar/{ferramenta.id}/"
+
+        response = client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="data_aquisicao" value="2024-03-01"')
+        self.assertContains(response, 'name="valor_aquisicao"')
+        self.assertContains(response, 'value="1250.75"')
+
+        response = client.post(
+            url,
+            {
+                "nome": "Furadeira Atualizada",
+                "local": "COFEN",
+                "data_aquisicao": "",
+                "valor_aquisicao": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        ferramenta.refresh_from_db()
+        self.assertEqual(str(ferramenta.data_aquisicao), "2024-03-01")
+        self.assertEqual(ferramenta.valor_aquisicao, Decimal("1250.75"))
+
     def test_editar_ferramenta_atualiza_responsavel(self):
         self.user.is_staff = True
         self.user.save(update_fields=["is_staff"])

@@ -435,8 +435,11 @@ def editar_ferramenta(request, id):
             "nome": request.POST.get("nome", ""),
             "categoria": request.POST.get("categoria", ""),
             "fabricante": request.POST.get("fabricante", ""),
-            "data_aquisicao": request.POST.get("data_aquisicao") or None,
-            "valor_aquisicao": valor_aquisicao or None,
+            "data_aquisicao": (
+                request.POST.get("data_aquisicao", "").strip()
+                or ferramenta.data_aquisicao
+            ),
+            "valor_aquisicao": valor_aquisicao or ferramenta.valor_aquisicao,
             "estado": request.POST.get("estado", ""),
             "local": local,
             "descricao": request.POST.get("descricao", ""),
