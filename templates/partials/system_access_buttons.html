@@ -45,16 +45,18 @@
 
 {% if request.user.is_authenticated %}
 <div class="system-access-buttons" aria-label="Acessos do sistema">
+  <a href="/ptmdsa/" class="btn-primary">Página Principal</a>
   <a href="/ptmdsa/cadptm/" class="btn-primary">Ir para Cadastro de Patrimônio</a>
   <a href="/ptmdsa/cadptm/pesquisar/" class="btn-primary">Pesquisa Patrimonio</a>
   <a href="/ptmdsa/cadferramentas/" class="btn-primary">Cadastro de Ferramentas</a>
   <a href="/ptmdsa/cadferramentas/listar_ferramentas/" class="btn-primary">Pesquisa Ferramentas</a>
   <a href="/ptmdsa/pontoeleptm/cadfaceptm/" class="btn-primary">Cadastro de Ponto Eletronico</a>
   <a href="/ptmdsa/pontoeleptm/usersfaceptm/" class="btn-primary">Pesquisa De Colaboradores</a>
+  <a href="/ptmdsa/ptmservicos/" class="btn-primary">Cadastro de Serviços</a>
+  <a href="/ptmdsa/ptmorcamentos/novo/" class="btn-primary">Novo Orçamento</a>
   {% if request.user.is_staff %}
     <a href="{% url 'cadastrar_usuario' %}" class="btn-primary">Cadastrar Usuario de Acesso</a>
     <a href="{% url 'listar_solicitacoes' %}" class="btn-primary">Solicitações de Alteração</a>
   {% endif %}
-  <a href="/ptmdsa/" class="btn-primary">Página Principal</a>
 </div>
 {% endif %}

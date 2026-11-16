@@ -129,6 +129,8 @@ INSTALLED_APPS = [
     "cadptm.apps.CadptmConfig",
     "cadferramentas.apps.CadferramentasConfig",
     "pontoele.apps.PontoeleConfig",
+    "ptmservicos.apps.PtmservicosConfig",
+    "ptmorcamentos.apps.PtmorcamentosConfig",
 ]
 
 MIDDLEWARE = [

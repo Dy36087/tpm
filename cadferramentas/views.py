@@ -5,7 +5,6 @@ from .models import (
     FotoFerramenta,
     Ferramenta,
     HistoricoAlteracaoFerramenta,
-    LocalFerramenta,
 )
 from django.shortcuts import get_object_or_404
 from pontoele.models import Servidor
@@ -14,6 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from principal.access import nivel_acesso, usuario_administrador
 from principal.views import criar_solicitacao_alteracao
+from ptmservicos.models import Cliente
 from django.views.decorators.http import require_POST
 
 try:
@@ -30,28 +30,40 @@ except ImportError:  # pragma: no cover - dependência opcional
 # Create your views here.
 
 
+def locais_clientes(atual=""):
+    nomes = sorted({nome.upper() for nome in Cliente.objects.values_list("nome", flat=True)})
+    if atual and atual not in nomes:
+        nomes.insert(0, atual)
+    return nomes
+
+
+def locais_com_totais(ferramentas):
+    totais = {
+        item["local"]: item["total"]
+        for item in ferramentas.order_by().values("local").annotate(total=Count("id"))
+    }
+    return [
+        {"local": nome, "total": totais.get(nome, 0)} for nome in locais_clientes()
+    ]
+
+
+
 @nivel_acesso("ferramentas")
 def dashboard_ferramentas(request):
 
     total_ferramentas = Ferramenta.objects.count()
 
-    total_cofen = Ferramenta.objects.filter(local="COFEN").count()
-
-    total_caesb = Ferramenta.objects.filter(local="CAESB").count()
-
     por_categoria = Ferramenta.objects.values("categoria").annotate(total=Count("id"))
 
-    por_local = Ferramenta.objects.values("local").annotate(total=Count("id"))
+    por_local = locais_com_totais(Ferramenta.objects.all())
 
     return render(
         request,
         "dashboard_ferramentas.html",
         {
             "total_ferramentas": total_ferramentas,
-            "total_cofen": total_cofen,
-            "total_caesb": total_caesb,
             "por_categoria": list(por_categoria),
-            "por_local": list(por_local),
+            "por_local": por_local,
         },
     )
 
@@ -155,36 +167,15 @@ def exportar_ferramentas_excel(request):
 def cadferramentas(request):
 
     servidores = Servidor.objects.all().order_by("nome")
-    locais_padrao = [
-        "COFEN",
-        "CAESB",
-        "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)",
-    ]
-    locais_cadastrados = LocalFerramenta.objects.all()
 
     return render(
         request,
         "cadferramentas.html",
         {
             "servidores": servidores,
-            "locais_cadastrados": locais_cadastrados,
+            "locais": locais_clientes(),
         },
     )
-
-
-@nivel_acesso("ferramentas")
-@require_POST
-def excluir_local(request, id):
-    local = get_object_or_404(LocalFerramenta, id=id)
-    if Ferramenta.objects.filter(local=local.nome).exists():
-        messages.error(
-            request,
-            "Este local ainda está associado a uma ferramenta e não pode ser excluído.",
-        )
-    else:
-        local.delete()
-        messages.success(request, "Local excluído com sucesso.")
-    return redirect("cadferramentas")
 
 
 @nivel_acesso("ferramentas")
@@ -205,16 +196,12 @@ def listar_ferramentas(request):
         ferramentas = ferramentas.filter(categoria=categoria)
 
     total_ferramentas = ferramentas.count()
-    total_cofen = ferramentas.filter(local="COFEN").count()
-    total_caesb = ferramentas.filter(local="CAESB").count()
     por_categoria = list(
         ferramentas.values("categoria")
         .annotate(total=Count("id"))
         .order_by("categoria")
     )
-    por_local = list(
-        ferramentas.values("local").annotate(total=Count("id")).order_by("local")
-    )
+    por_local = locais_com_totais(ferramentas)
 
     paginator = Paginator(ferramentas, 12)
     page_number = request.GET.get("page")
@@ -227,10 +214,9 @@ def listar_ferramentas(request):
             "page_obj": page_obj,
             "nome_filtro": nome_filtro,
             "local_selecionado": local_filtro,
+            "locais": locais_clientes(local_filtro or ""),
             "categoria_selecionada": categoria,
             "total_ferramentas": total_ferramentas,
-            "total_cofen": total_cofen,
-            "total_caesb": total_caesb,
             "por_categoria": por_categoria,
             "por_local": por_local,
         },
@@ -272,6 +258,7 @@ def relatorio_ferramentas(request):
             "servidores": Servidor.objects.all().order_by("nome"),
             "ferramenta_filtro": ferramenta_filtro,
             "local_filtro": local_filtro,
+            "locais": locais_clientes(local_filtro),
             "responsavel_filtro": responsavel_filtro,
             "historico_filtro": historico_filtro,
         },
@@ -290,10 +277,6 @@ def cadastrar_ferramenta(request):
         valor_aquisicao = request.POST.get("valor_aquisicao", "").strip()
         estado = request.POST.get("estado", "").strip().upper()
         local = request.POST.get("local", "").strip().upper()
-        local_novo = request.POST.get("local_novo", "").strip().upper()
-        if local == "NOVO_LOCAL":
-            local = local_novo or "OUTRO"
-            LocalFerramenta.objects.get_or_create(nome=local)
         descricao = request.POST.get("descricao", "").strip().upper()
         responsavel = None
 
@@ -417,10 +400,6 @@ def editar_ferramenta(request, id):
             patrimonio = "SEM_PATRIMONIO"
 
         local = request.POST.get("local", "").strip().upper()
-        local_novo = request.POST.get("local_novo", "").strip().upper()
-        if local == "NOVO_LOCAL":
-            local = local_novo or "OUTRO"
-            LocalFerramenta.objects.get_or_create(nome=local)
 
         responsavel_id = request.POST.get("responsavel", "").strip()
         responsavel = (
@@ -485,19 +464,12 @@ def editar_ferramenta(request, id):
 
         return redirect("listar_ferramentas")
 
-    local_custom = ferramenta.local not in [
-        "COFEN",
-        "CAESB",
-        "VIAGEM (ESPECIFICAR NA DESCRIÇÃO)",
-    ]
-
     return render(
         request,
         "editferramenta.html",
         {
             "ferramenta": ferramenta,
-            "local_custom": local_custom,
-            "locais_cadastrados": LocalFerramenta.objects.all(),
+            "locais": locais_clientes(ferramenta.local),
             "servidores": Servidor.objects.all().order_by("nome"),
         },
     )

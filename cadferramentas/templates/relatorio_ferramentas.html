@@ -41,9 +41,9 @@
           <label for="local">Local</label>
           <select id="local" name="local">
             <option value="">Todos</option>
-            <option value="COFEN" {% if local_filtro == 'COFEN' %}selected{% endif %}>COFEN</option>
-            <option value="CAESB" {% if local_filtro == 'CAESB' %}selected{% endif %}>CAESB</option>
-            <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)" {% if local_filtro == 'VIAGEM (ESPECIFICAR NA DESCRIÇÃO)' %}selected{% endif %}>Viagem</option>
+            {% for local in locais %}
+            <option value="{{ local }}" {% if local_filtro == local %}selected{% endif %}>{{ local }}</option>
+            {% endfor %}
           </select>
         </div>
         <div class="campo">
@@ -83,7 +83,7 @@
         </table>
         {% else %}<p class="vazio">Nenhuma ferramenta encontrada para os filtros informados.</p>{% endif %}
       </div>
-      <div class="acoes"><a class="link" href="{% url 'listar_ferramentas' %}">Voltar para ferramentas</a><a class="link secundario" href="{% url 'cadferramentas' %}">Cadastrar ferramenta</a></div>
+      <div class="acoes"><a class="link" href="{% url 'listar_ferramentas' %}" onclick="if (document.referrer.indexOf(location.origin) === 0) { history.back(); return false }">Voltar para ferramentas</a><a class="link secundario" href="{% url 'cadferramentas' %}">Cadastrar ferramenta</a></div>
     </main>
   </body>
 </html>

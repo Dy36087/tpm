@@ -1,4 +1,5 @@
 from django import forms
+from ptmservicos.models import Cliente
 from .models import Patrimonio
 
 
@@ -65,3 +66,15 @@ class PatrimonioForm(forms.ModelForm):
             "localizacao": "Localização",
             "status": "Status",
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        nomes = list(Cliente.objects.order_by("nome").values_list("nome", flat=True))
+        atual = self.instance.localizacao if self.instance.pk else ""
+        if atual and atual not in nomes:
+            nomes.insert(0, atual)
+        self.fields["localizacao"] = forms.ChoiceField(
+            label="Localização",
+            choices=[("", "Selecione um cliente")] + [(n, n) for n in nomes],
+            widget=forms.Select(attrs={"class": "form-control"}),
+        )

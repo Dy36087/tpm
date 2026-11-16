@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadastro de Ferramentas</title>
+    <title>PTM</title>
     <link
       rel="shortcut icon"
       type="image/png"
@@ -91,37 +91,6 @@
         border-radius: 5px;
       }
 
-      .locais-gerenciados {
-        margin-top: 20px;
-        padding: 16px;
-        border: 1px solid #d9e0e3;
-        border-radius: 8px;
-        background: #f8fafb;
-      }
-
-      .local-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 8px 0;
-        border-bottom: 1px solid #e3e8eb;
-      }
-
-      .local-item:last-child {
-        border-bottom: 0;
-      }
-
-      .local-item form {
-        margin: 0;
-      }
-
-      .btn-excluir-local {
-        width: auto;
-        padding: 6px 10px;
-        background: #c62828;
-        font-size: 12px;
-      }
       @media (max-width: 768px) {
         body {
           display: block;
@@ -141,9 +110,9 @@
     {% include 'partials/user_status.html' %}
     <div class="container">
       <div class="logo-topo">
-        <img src="{% static 'principal/img/logo.png' %}" alt="Logo" />
+        <a href="/ptmdsa/" title="Página Principal" style="pointer-events:auto"><img src="{% static 'principal/img/logo.png' %}" alt="Logotipo do PTM - DSA, no topo da página de cadastro de ferramentas" /></a>
       </div>
-      <h2>PTM - DSA - FERRAMENTAS</h2>
+      <h2>PTM - DSA - CADASTRO DE FERRAMENTAS</h2>
       {% if messages %}
       {% for message in messages %}
       <div class="form-group">{{ message }}</div>
@@ -219,27 +188,11 @@
         <div class="form-group">
           <label for="local">Local</label
           ><select id="local" name="local" required>
-            <option value="COFEN">COFEN</option>
-            <option value="CAESB">CAESB</option>
-            <option value="VIAGEM (ESPECIFICAR NA DESCRIÇÃO)">
-              VIAGEM (ESPECIFICAR NA DESCRIÇÃO)
-            </option>
-            {% for local_cadastrado in locais_cadastrados %}
-            <option value="{{ local_cadastrado }}">{{ local_cadastrado }}</option>
+            <option value="">Selecione um cliente</option>
+            {% for local in locais %}
+            <option value="{{ local }}">{{ local }}</option>
             {% endfor %}
-            <option value="NOVO_LOCAL">Cadastrar local novo...</option>
           </select>
-        </div>
-        <div class="form-group" id="local_novo_group" style="display: none">
-          <label for="local_novo">Novo Local</label
-          ><input
-            type="text"
-            id="local_novo"
-            name="local_novo"
-            maxlength="100"
-            placeholder="Digite o nome do local"
-            required
-          />
         </div>
         <div class="form-group">
           <label for="responsavel">Responsável pela Ferramenta</label>
@@ -272,28 +225,11 @@
         {% include 'partials/system_access_buttons.html' %}
       </form>
     </div>
-    <section class="locais-gerenciados">
-      <h3>Locais cadastrados</h3>
-      {% for local_cadastrado in locais_cadastrados %}
-      <div class="local-item">
-        <span>{{ local_cadastrado.nome }}</span>
-        <form method="post" action="{% url 'excluir_local' local_cadastrado.id %}">
-          {% csrf_token %}
-          <button class="btn-excluir-local" type="submit">Excluir</button>
-        </form>
-      </div>
-      {% empty %}
-      <p>Nenhum local personalizado cadastrado.</p>
-      {% endfor %}
-    </section>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const possuiPatrimonio = document.getElementById("possui_patrimonio");
         const patrimonioDiv = document.getElementById("patrimonio_div");
         const patrimonioInput = document.getElementById("patrimonio");
-        const localSelect = document.getElementById("local");
-        const localNovoGroup = document.getElementById("local_novo_group");
-        const localNovoInput = document.getElementById("local_novo");
         const fotosInput = document.getElementById("fotos");
         const fotosPreview = document.getElementById("fotos_preview");
         function controlarPatrimonio() {
@@ -305,12 +241,6 @@
             : patrimonioInput.value === "sem_patrimonio"
               ? ""
               : patrimonioInput.value;
-        }
-        function controlarLocal() {
-          const novoLocal = localSelect.value === "NOVO_LOCAL";
-          localNovoGroup.style.display = novoLocal ? "block" : "none";
-          localNovoInput.required = novoLocal;
-          if (!novoLocal) localNovoInput.value = "";
         }
         fotosInput.addEventListener("change", function () {
           const arquivos = Array.from(fotosInput.files).slice(0, 4);
@@ -333,9 +263,7 @@
             }),
           );
         possuiPatrimonio.addEventListener("change", controlarPatrimonio);
-        localSelect.addEventListener("change", controlarLocal);
         controlarPatrimonio();
-        controlarLocal();
       });
     </script>
   </body>

@@ -44,7 +44,7 @@
       .botao-principal:hover {
         background: #005ea6;
       }
-      
+
       .container {
         width: 700px;
         margin: auto;
@@ -53,17 +53,17 @@
         border-radius: 10px;
         box-shadow: 0 0 10px #ccc;
       }
-      
+
       #cameraContainer {
         position: relative;
         width: 500px;
         margin: auto;
       }
-      
+
       #camera {
         width: 100%;
       }
-      
+
       #guiaFace {
         position: absolute;
         left: 50%;
@@ -75,7 +75,7 @@
         border-radius: 50%;
         pointer-events: none;
       }
-      
+
       input,
       button {
         width: 100%;
@@ -101,7 +101,7 @@
       #instrucao {
         display: none;
       }
-      
+
       @media (max-width: 768px) {
         .cabecalho {
           width: 100%;
@@ -111,11 +111,11 @@
           width: 100%;
           padding: 14px;
         }
-      
+
         #cameraContainer {
           width: 100%;
         }
-      
+
         #guiaFace {
           width: 170px;
           height: 230px;
@@ -129,7 +129,7 @@
     {% include 'partials/system_access_buttons.html' %}
     <header class="cabecalho">
       <a class="logo-topo" href="{% url 'home' %}" aria-label="Ir para a página principal">
-        <img src="{% static 'principal/img/logo.png' %}" alt="Logo PTM" />
+        <a href="/ptmdsa/" title="Página Principal" style="pointer-events:auto"><img src="{% static 'principal/img/logo.png' %}" alt="Logo PTM" /></a>
       </a>
       <a class="botao-principal" href="{% url 'home' %}">Página principal</a>
     </header>
@@ -147,7 +147,7 @@
       <input type="text" id="cpf" placeholder="CPF" />
 
       <input type="text" id="rg" placeholder="RG" />
-      
+
       <label for="data_nascimento">Data de Nascimento</label>
       <input type="date" id="data_nascimento" />
 
@@ -164,6 +164,11 @@
       <input type="text" id="cidade" placeholder="Cidade" />
 
       <input type="text" id="uf" placeholder="UF" maxlength="2" />
+
+      <label>Clientes sob responsabilidade do técnico</label>
+      <div id="clientes" style="max-height:160px;overflow-y:auto;border:1px solid #ccc;border-radius:5px;padding:8px;text-align:left">
+        {% for cliente in clientes %}<label style="display:flex;align-items:center;gap:8px;font-weight:normal"><input type="checkbox" name="clientes" value="{{ cliente.id }}" style="width:auto" />{{ cliente.nome }}</label>{% empty %}<small>Nenhum cliente cadastrado.</small>{% endfor %}
+      </div>
 
       <div id="cameraContainer">
         <video id="camera" autoplay muted playsinline></video>
@@ -182,12 +187,12 @@
       let modoCadastro = null
       let cameraStream = null
       let monitoramentoFace = null
-      
+
       async function carregarModelos() {
         await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)])
         console.log('Modelos carregados de', MODEL_URL)
       }
-      
+
       async function iniciarCamera() {
         const video = document.getElementById('camera')
         const stream = await navigator.mediaDevices.getUserMedia({ video: true })
@@ -200,33 +205,34 @@
           }
         })
       }
-      
+
       async function detectarFace() {
         const video = document.getElementById('camera')
         const instrucao = document.getElementById('instrucao')
-      
+
         const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-      
+
         if (!detection) {
           instrucao.textContent = 'Nenhum rosto detectado. Posicione seu rosto dentro do oval verde.'
           return { ok: false, faceEncoding: null }
         }
-      
+
         const landmarks = await faceapi.detectFaceLandmarks(video)
         const descriptor = await faceapi.computeFaceDescriptor(video, landmarks)
-      
+
         instrucao.textContent = 'Rosto detectado! Clique em Cadastrar Face.'
         return { ok: true, faceEncoding: Array.from(descriptor) }
       }
-      
+
       function monitorarFace() {
         monitoramentoFace = setInterval(detectarFace, 500)
       }
 
       function prepararNovoCadastro() {
-        document.getElementById('formularioCadastro').querySelectorAll('input').forEach((campo) => {
+        document.getElementById('formularioCadastro').querySelectorAll('input:not([type="checkbox"])').forEach((campo) => {
           campo.value = ''
         })
+        document.querySelectorAll('#clientes input').forEach((cx) => { cx.checked = false })
         document.getElementById('cameraContainer').style.display = 'none'
         document.getElementById('instrucao').style.display = 'none'
         document.getElementById('instrucao').textContent = 'Posicione seu rosto dentro do oval verde'
@@ -244,7 +250,7 @@
         }
         modoCadastro = null
       }
-      
+
       async function enviarCadastro() {
         const nome = document.getElementById('nome').value.trim()
         if (!nome) {
@@ -259,7 +265,7 @@
           }
           faceEncoding = resultadoDeteccao.faceEncoding
         }
-      
+
         try {
           const resposta = await fetch("{% url 'cadastrar_face' %}", {
             method: 'POST',
@@ -268,38 +274,40 @@
             },
             body: JSON.stringify({
               nome: document.getElementById('nome').value,
-      
+
               cpf: document.getElementById('cpf').value,
-      
+
               rg: document.getElementById('rg').value,
-      
+
               data_nascimento: document.getElementById('data_nascimento').value,
-      
+
               email: document.getElementById('email').value,
-      
+
               telefone: document.getElementById('telefone').value,
-      
+
               cep: document.getElementById('cep').value,
-      
+
               endereco: document.getElementById('endereco').value,
-      
+
               bairro: document.getElementById('bairro').value,
-      
+
               cidade: document.getElementById('cidade').value,
-      
+
               uf: document.getElementById('uf').value,
-      
+
+              clientes: Array.from(document.querySelectorAll('#clientes input:checked')).map((cx) => cx.value),
+
               face_encoding: faceEncoding
             })
           })
-      
+
           const tipoConteudo = resposta.headers.get('content-type') || ''
           if (!tipoConteudo.includes('application/json')) {
             throw new Error('O servidor retornou uma resposta inválida. Atualize a página e tente novamente.')
           }
 
           const dados = await resposta.json()
-      
+
           if (resposta.ok && dados.sucesso) {
             alert('Cadastro realizado com sucesso! Matrícula: ' + dados.matricula)
             prepararNovoCadastro()
@@ -312,7 +320,7 @@
           alert('Erro ao enviar cadastro: ' + erro.message)
         }
       }
-      
+
       async function selecionarModoCadastro(modo) {
         modoCadastro = modo
         document.getElementById('opcoesCadastro').style.display = 'none'

@@ -202,7 +202,7 @@
         {% include 'partials/system_access_buttons.html' %}
         <div class="container">
             <div class="logo-topo">
-                    <img src="{% static 'principal/img/logo.png' %}" alt="Logo">
+                    <a href="/ptmdsa/" title="Página Principal" style="pointer-events:auto"><img src="{% static 'principal/img/logo.png' %}" alt="Logo"></a>
             </div>
 
             {% if messages %}
@@ -222,12 +222,15 @@
                         <div style="display:flex;gap:10px;">
 
                             <input type="text" id="busca" placeholder="Buscar patrimônio ou material">
-                            
+
                             <input type="text" id="filtro_material" placeholder="Material">
 
-                            <input type="text" id="filtro_localizacao" placeholder="Localização">
+                            <select id="filtro_localizacao">
+                                <option value="">Localização</option>
+                                {% for cliente in clientes %}<option value="{{ cliente.nome }}">{{ cliente.nome }}</option>{% endfor %}
+                            </select>
 
-                            
+
                             <select id="filtro_tipo">
                                     <option value="">Tipo</option>
                                     <option value="proprio">Próprio</option>
@@ -290,8 +293,8 @@
                 <button class="botao" onclick="paginaAnterior()">Anterior</button>
                 <span id="pagina-info"></span>
                 <button class="botao" onclick="proximaPagina()">Próxima</button>
-            </div>          
-            
+            </div>
+
             <div class="grafico-card">
                 <h3>Status dos Patrimônios</h3>
 
@@ -408,7 +411,7 @@
             <script>
                 // A função antiga com 7 parâmetros foi removida para evitar conflito.
             </script>
-            <script>    
+            <script>
             function exportar() {
 
                 const selecionados = getSelecionados();
@@ -509,8 +512,8 @@
                             atualizarPaginacao(data.pagina, data.total_paginas);
 
                             data.itens.forEach(item => {
-                                const tr = document.createElement("tr");                    
-                                tr.innerHTML = `                        
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
                                     <td><input type="checkbox" class="item-select" value="${item.id}" onchange="atualizarContador()"></td>
                                     <td>${item.controle || ""}</td>
                                     <td>${item.patrimonio || ""}</td>
@@ -526,7 +529,7 @@
                                     </td>
 
                                     <td>
-                                        ${item.qr_code 
+                                        ${item.qr_code
                                             ? `<img src="/media/${item.qr_code}" width="50">`
                                             : ""}
                                     </td>
@@ -560,7 +563,7 @@
                     fetch(`/ptmdsa/cadptm/excluir_item/${id}/`, {
                         method: "POST",
                         headers: {
-                            "X-CSRFToken": getCSRFToken()        
+                            "X-CSRFToken": getCSRFToken()
                         }
                 })
                     .then(() => {
@@ -590,7 +593,7 @@
                     return "";
                 }
             </script>
-            <script>    
+            <script>
                 function verEtiqueta(id) {
                     window.open(`/ptmdsa/cadptm/etiqueta/${id}/`, "_blank");
                 }

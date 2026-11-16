@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 
 from .models import Patrimonio
+from ptmservicos.models import Cliente
 
 
 class HistoricoPatrimonioTest(TestCase):
@@ -28,6 +29,7 @@ class HistoricoPatrimonioTest(TestCase):
             status="ativo",
         )
 
+        Cliente.objects.create(nome="ALMOXARIFADO B", cpf_cnpj="33333333333")
         client = Client()
         client.force_login(self.user)
 

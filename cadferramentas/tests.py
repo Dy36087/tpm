@@ -5,9 +5,10 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, SimpleTestCase, TestCase
 
-from .models import FotoFerramenta, Ferramenta, LocalFerramenta
+from .models import FotoFerramenta, Ferramenta
 from principal.access import grupos_de_acesso
 from principal.models import SolicitacaoAlteracao
+from ptmservicos.models import Cliente
 from pontoele.models import Servidor
 
 
@@ -53,8 +54,8 @@ class HistoricoFerramentaTest(TestCase):
         self.assertEqual(ferramenta.patrimonio, "SEM_PATRIMONIO")
         self.assertEqual(ferramenta.valor_aquisicao, Decimal("1250.75"))
 
-    def test_cadastro_exibe_locais_customizados_existentes(self):
-        Ferramenta.objects.create(nome="Furadeira", local="OFICINA CENTRAL")
+    def test_cadastro_lista_clientes_como_locais(self):
+        Cliente.objects.create(nome="Oficina Central", cpf_cnpj="11111111111")
 
         client = Client()
         client.force_login(self.user)
@@ -63,43 +64,37 @@ class HistoricoFerramentaTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'value="OFICINA CENTRAL">OFICINA CENTRAL</option>')
+        self.assertNotContains(response, "COFEN")
 
-    def test_novo_local_fica_disponivel_para_cadastros_posteriores(self):
+    def test_filtros_listam_clientes_como_locais(self):
+        Cliente.objects.create(nome="Almoxarifado", cpf_cnpj="22222222222")
+
         client = Client()
         client.force_login(self.user)
 
-        response = client.post(
-            "/ptmdsa/cadferramentas/cadastrar/",
-            {"nome": "Furadeira", "local": "NOVO_LOCAL", "local_novo": "ALMOXARIFADO"},
+        for url in ["/ptmdsa/cadferramentas/listar_ferramentas/", "/ptmdsa/cadferramentas/relatorio/"]:
+            response = client.get(url)
+            if response.status_code == 200:
+                self.assertContains(response, 'value="ALMOXARIFADO"')
+
+    def test_cards_por_local_usam_apenas_clientes(self):
+        Cliente.objects.create(nome="Almoxarifado", cpf_cnpj="44444444444")
+        Cliente.objects.create(nome="Vazio", cpf_cnpj="55555555555")
+        Ferramenta.objects.create(nome="Serra", local="ALMOXARIFADO")
+        Ferramenta.objects.create(nome="Lima", local="ALMOXARIFADO")
+        Ferramenta.objects.create(nome="Torno", local="COFEN")
+
+        client = Client()
+        client.force_login(self.user)
+        response = client.get("/ptmdsa/cadferramentas/listar_ferramentas/")
+
+        self.assertEqual(
+            response.context["por_local"],
+            [
+                {"local": "ALMOXARIFADO", "total": 2},
+                {"local": "VAZIO", "total": 0},
+            ],
         )
-
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(LocalFerramenta.objects.filter(nome="ALMOXARIFADO").exists())
-
-        response = client.get("/ptmdsa/cadferramentas/")
-        self.assertContains(response, 'value="ALMOXARIFADO">ALMOXARIFADO</option>')
-
-    def test_local_sem_uso_pode_ser_excluido(self):
-        local = LocalFerramenta.objects.create(nome="LOCAL TEMPORARIO")
-        client = Client()
-        client.force_login(self.user)
-
-        response = client.post(f"/ptmdsa/cadferramentas/locais/excluir/{local.id}/")
-
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(LocalFerramenta.objects.filter(id=local.id).exists())
-
-    def test_local_em_uso_nao_pode_ser_excluido(self):
-        ferramenta = Ferramenta.objects.create(nome="Furadeira", local="OFICINA")
-        local = LocalFerramenta.objects.get(nome="OFICINA")
-        client = Client()
-        client.force_login(self.user)
-
-        response = client.post(f"/ptmdsa/cadferramentas/locais/excluir/{local.id}/")
-
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(LocalFerramenta.objects.filter(id=local.id).exists())
-        self.assertTrue(Ferramenta.objects.filter(id=ferramenta.id).exists())
 
     def test_listagem_filtra_ferramentas_por_nome(self):
         Ferramenta.objects.create(nome="Furadeira Bosch", local="COFEN")
@@ -117,6 +112,7 @@ class HistoricoFerramentaTest(TestCase):
         self.assertNotContains(response, "Alicate Universal")
 
     def test_listagem_gera_dados_do_grafico_para_locais_personalizados(self):
+        Cliente.objects.create(nome="Oficina Central", cpf_cnpj="66666666666")
         Ferramenta.objects.create(nome="Furadeira", local="OFICINA CENTRAL")
         Ferramenta.objects.create(nome="Alicate", local="OFICINA CENTRAL")
 

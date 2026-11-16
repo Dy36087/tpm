@@ -5,7 +5,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Cadastro de Patrimônio</title>
-<link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}"> 
+<link rel="shortcut icon" type="image/png" href="{% static 'principal/img/logo.png' %}">
 <link rel="stylesheet" href="{% static 'ptm/css/ptmcadastrar.css' %}"/>
 <link rel="stylesheet" href="{% static 'css/responsive.css' %}"/>
 <style>
@@ -94,12 +94,13 @@
             margin-bottom: 20px;
             width: 100%;
             max-width: 700px;
+            pointer-events: none;
         }
 
         .logo-topo img {
             height: 120px;
         }
-    
+
         input,
         select,
         textarea {
@@ -108,7 +109,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
-            text-transform: uppercase;  
+            text-transform: uppercase;
         }
 
         th, td {
@@ -207,21 +208,21 @@
     {% include 'partials/user_status.html' %}
     {% include 'partials/system_access_buttons.html' %}
     <div class="logo-topo">
-        <img src="{% static 'principal/img/logo.png' %}" alt="Logo">
+        <a href="/ptmdsa/" title="Página Principal" style="pointer-events:auto"><img src="{% static 'principal/img/logo.png' %}" alt="Logo"></a>
     </div>
     <div class="container">
         <section class="hero">
             <h1>PTM - CADASTRO PATRIMONIO</h1>
-            
+
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert success">{{ message }}</div>
                 {% endfor %}
             {% endif %}
-            
+
             <form method="post">
                 {% csrf_token %}
-                
+
                 {% for field in form %}
                     {% if field.name == 'status' %}
                         <div class="form-group">
@@ -251,12 +252,12 @@
                 <p>
                     <button type="submit" class="btn-primary">Salvar</button>
                 </p>
-                
+
                 <div class="acoes">
                     <a href="/ptmdsa/" class="botao">PAGINA PRINCIPAL</a>
                     <a href="/ptmdsa/cadptm/pesquisar/" class="botao">PESQUISAR PATRIMONIO</a>
                 </div>
-            </form>                        
+            </form>
         </section>
     </div>
     <script>

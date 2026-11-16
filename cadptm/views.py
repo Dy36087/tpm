@@ -19,6 +19,7 @@ from principal.access import nivel_acesso, usuario_administrador
 from principal.views import criar_solicitacao_alteracao
 
 from .forms import PatrimonioForm
+from ptmservicos.models import Cliente
 from .models import (
     Auditoria,
     HistoricoAlteracaoPatrimonio,
@@ -395,7 +396,7 @@ def cadptm(request):
 
 @nivel_acesso("patrimonio")
 def pesquisar(request):
-    return render(request, "searchptm.html")
+    return render(request, "searchptm.html", {"clientes": Cliente.objects.all()})
 
 
 @nivel_acesso("patrimonio")

@@ -66,12 +66,18 @@ def avaliar_solicitacao(request, id):
             SolicitacaoAlteracao.TIPO_SERVIDOR: Servidor,
         }
         objeto = modelos[solicitacao.tipo].objects.get(id=solicitacao.objeto_id)
+        dados = dict(dados)
+        clientes_ids = dados.pop("clientes_ids", None)
         for campo, valor in dados.items():
             if campo == "responsavel_id":
                 setattr(objeto, "responsavel_id", valor or None)
             else:
                 setattr(objeto, campo, valor)
         objeto.save()
+        if clientes_ids is not None and solicitacao.tipo == SolicitacaoAlteracao.TIPO_SERVIDOR:
+            from pontoele.views import atribuir_clientes
+
+            atribuir_clientes(objeto, clientes_ids)
         solicitacao.status = SolicitacaoAlteracao.STATUS_APROVADA
         messages.success(request, "Solicitação aprovada e alteração aplicada.")
     else:

@@ -18,6 +18,7 @@ from principal.access import (
 from principal.views import criar_solicitacao_alteracao
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from ptmservicos.models import Cliente
 from .models import RegistroPonto, Servidor
 from .models import Servidor
 from .models import RegistroPonto
@@ -57,9 +58,14 @@ def gerar_matricula():
     return f"DSAF{numero:04d}"
 
 
+def atribuir_clientes(servidor, ids):
+    ids = [int(i) for i in ids if str(i).isdigit()]
+    servidor.clientes_responsavel.set(Cliente.objects.filter(id__in=ids))
+
+
 @nivel_acesso("pontoele")
 def cadfaceptm(request):
-    return render(request, "cadfaceptm.html")
+    return render(request, "cadfaceptm.html", {"clientes": Cliente.objects.all()})
 
 
 @nivel_acesso("pontoele")
@@ -70,7 +76,11 @@ def pontoeleptm(request):
 @nivel_acesso("pontoele")
 def usersfaceptm(request):
     servidores = Servidor.objects.all()
-    return render(request, "ptmcolaboradores.html", {"servidores": servidores})
+    return render(
+        request,
+        "ptmcolaboradores.html",
+        {"servidores": servidores, "clientes": Cliente.objects.all()},
+    )
 
 
 @login_required
@@ -241,6 +251,7 @@ def cadastrar_face(request):
         )
         servidor.full_clean()
         servidor.save()
+        atribuir_clientes(servidor, dados.get("clientes") or [])
     except ValidationError as erro:
         return JsonResponse({"sucesso": False, "erro": erro.message_dict}, status=400)
     except IntegrityError:
@@ -376,7 +387,11 @@ def listar_servidores(request):
     return render(
         request,
         "ptmcolaboradores.html",
-        {"servidores": servidores, "pesquisa": pesquisa},
+        {
+            "servidores": servidores,
+            "pesquisa": pesquisa,
+            "clientes": Cliente.objects.all(),
+        },
     )
 
 
@@ -391,7 +406,9 @@ def editar_servidor(request, servidor_id):
                 "cep", "endereco", "bairro", "cidade", "uf",
             ]
         }
+        clientes_ids = request.POST.getlist("clientes")
         if not usuario_administrador(request.user):
+            dados["clientes_ids"] = clientes_ids
             criar_solicitacao_alteracao("servidor", servidor.id, dados, request.user)
             messages.info(request, "Alteração enviada para avaliação do administrador.")
             return redirect("listar_servidores")
@@ -418,6 +435,7 @@ def editar_servidor(request, servidor_id):
         try:
             servidor.full_clean()
             servidor.save()
+            atribuir_clientes(servidor, clientes_ids)
         except ValidationError:
             pass
 

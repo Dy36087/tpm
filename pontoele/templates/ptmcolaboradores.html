@@ -32,13 +32,16 @@
       .alert { padding: 12px; margin-bottom: 15px; border-radius: 5px; }
       .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
       .alert.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+      .lista-caixas { max-height: 160px; overflow-y: auto; border: 1px solid #bbb; border-radius: 4px; padding: 8px; }
+      .lista-caixas label { display: flex; align-items: center; gap: 8px; font-weight: normal; margin: 0 0 4px; }
+      .lista-caixas input { width: auto; padding: 0; }
       @media (max-width: 650px) { body { padding: 12px; } .container { padding: 16px; } .campos { grid-template-columns: 1fr; } }
     </style>
   </head>
   <body>
     {% include 'partials/user_status.html' %}
     <main class="container">
-      <div class="topo"><img src="{% static 'principal/img/logo.png' %}" alt="Logo" /><h2>Colaboradores Cadastrados</h2></div>
+      <div class="topo"><a href="/ptmdsa/" title="Página Principal"><img src="{% static 'principal/img/logo.png' %}" alt="Logo" /></a><h2>Colaboradores Cadastrados</h2></div>
       {% if messages %}
         {% for message in messages %}
           <div class="alert {{ message.tags|default:'info' }}">{{ message }}</div>
@@ -52,7 +55,7 @@
               <tr>
                 <td>{{ servidor.matricula }}</td><td>{{ servidor.nome }}</td><td>{{ servidor.cpf }}</td><td>{{ servidor.email }}</td><td>{{ servidor.telefone }}</td><td>{{ servidor.cidade }}/{{ servidor.uf }}</td>
                 <td class="acoes">
-                  <button class="editar" type="button" data-servidor='{"id":"{{ servidor.id }}","nome":"{{ servidor.nome|escapejs }}","cpf":"{{ servidor.cpf|escapejs }}","rg":"{{ servidor.rg|escapejs }}","data_nascimento":"{{ servidor.data_nascimento|date:'Y-m-d' }}","email":"{{ servidor.email|escapejs }}","telefone":"{{ servidor.telefone|escapejs }}","cep":"{{ servidor.cep|escapejs }}","endereco":"{{ servidor.endereco|escapejs }}","bairro":"{{ servidor.bairro|escapejs }}","cidade":"{{ servidor.cidade|escapejs }}","uf":"{{ servidor.uf|escapejs }}"}'>Alterar</button>
+                  <button class="editar" type="button" data-servidor='{"id":"{{ servidor.id }}","nome":"{{ servidor.nome|escapejs }}","cpf":"{{ servidor.cpf|escapejs }}","rg":"{{ servidor.rg|escapejs }}","data_nascimento":"{{ servidor.data_nascimento|date:'Y-m-d' }}","email":"{{ servidor.email|escapejs }}","telefone":"{{ servidor.telefone|escapejs }}","cep":"{{ servidor.cep|escapejs }}","endereco":"{{ servidor.endereco|escapejs }}","bairro":"{{ servidor.bairro|escapejs }}","cidade":"{{ servidor.cidade|escapejs }}","uf":"{{ servidor.uf|escapejs }}"}' data-clientes="{% for c in servidor.clientes_responsavel.all %}{{ c.id }}{% if not forloop.last %},{% endif %}{% endfor %}">Alterar</button>
                   <form method="post" action="{% url 'excluir_servidor' servidor.id %}" onsubmit="return confirm('Excluir este colaborador?')">{% csrf_token %}<button class="excluir" type="submit">Excluir</button></form>
                 </td>
               </tr>
@@ -79,13 +82,14 @@
           <div><label for="bairro">Bairro</label><input id="bairro" name="bairro" required /></div>
           <div><label for="cidade">Cidade</label><input id="cidade" name="cidade" required /></div>
           <div><label for="uf">UF</label><input id="uf" name="uf" maxlength="2" required /></div>
+          <div style="grid-column: 1 / -1"><label>Clientes sob responsabilidade do técnico</label><div class="lista-caixas">{% for cliente in clientes %}<label><input type="checkbox" name="clientes" value="{{ cliente.id }}" />{{ cliente.nome }}</label>{% empty %}<small>Nenhum cliente cadastrado.</small>{% endfor %}</div></div>
         </div>
         <div class="modal-acoes"><button class="cancelar" type="button" id="cancelarEdicao">Cancelar</button><button class="editar" type="submit">Salvar</button></div>
       </form>
     </dialog>
       <section>
         {% include 'partials/system_access_buttons.html' %}
-    </section>   
+    </section>
     <script>
       const modal = document.getElementById('modalEdicao')
       const formEdicao = document.getElementById('formEdicao')
@@ -94,6 +98,8 @@
           const servidor = JSON.parse(botao.dataset.servidor)
           formEdicao.action = `/ptmdsa/pontoeleptm/servidores/${servidor.id}/editar/`
           Object.entries(servidor).forEach(([campo, valor]) => { const input = formEdicao.elements[campo]; if (input) input.value = valor })
+          const selecionados = (botao.dataset.clientes || '').split(',').filter(Boolean)
+          formEdicao.querySelectorAll('input[name="clientes"]').forEach((cx) => { cx.checked = selecionados.includes(cx.value) })
           modal.showModal()
         })
       })

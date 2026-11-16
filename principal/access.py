@@ -28,6 +28,17 @@ def usuario_administrador(usuario):
     )
 
 
+def administrador_required(view):
+    @wraps(view)
+    @login_required
+    def wrapped(request, *args, **kwargs):
+        if usuario_administrador(request.user):
+            return view(request, *args, **kwargs)
+        return HttpResponseForbidden("Apenas administradores têm acesso a este módulo.")
+
+    return wrapped
+
+
 def nivel_acesso(nivel):
     nome_grupo = NIVEIS_ACESSO[nivel]
 

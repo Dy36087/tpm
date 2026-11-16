@@ -12,7 +12,6 @@ urlpatterns = [
     path("editar/<int:id>/", views.editar_ferramenta, name="editar_ferramenta"),
     path("detalhes/<int:id>/", views.detalhes_ferramenta, name="detalhes_ferramenta"),
     path("excluir/<int:id>/", views.excluir_ferramenta, name="excluir_ferramenta"),
-    path("locais/excluir/<int:id>/", views.excluir_local, name="excluir_local"),
     path(
         "historico/<int:id>/", views.historico_ferramenta, name="historico_ferramenta"
     ),

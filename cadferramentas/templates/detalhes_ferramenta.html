@@ -121,7 +121,7 @@
           <div class="codigo">{{ ferramenta.codigo }}</div>
           <h1>{{ ferramenta.nome }}</h1>
         </div>
-        <a href="{% url 'listar_ferramentas' %}">Voltar</a>
+        <a href="{% url 'listar_ferramentas' %}" onclick="if (document.referrer.indexOf(location.origin) === 0) { history.back(); return false }">Voltar</a>
       </div>
 
       <div class="informacoes">

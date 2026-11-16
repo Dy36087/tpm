@@ -47,6 +47,8 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
+    path("ptmdsa/ptmservicos/", include("ptmservicos.urls")),
+    path("ptmdsa/ptmorcamentos/", include("ptmorcamentos.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -22,11 +22,11 @@
         top: 10px;
         left: 10px;
       }
-      
+
       .logo-topo img {
         height: 120px;
       }
-      
+
       @media (max-width: 768px) {
         .etiqueta {
           width: 100%;
@@ -40,7 +40,7 @@
   <body>
     {% include 'partials/system_access_buttons.html' %}
     <div class="logo-topo">
-      <img src="{% static 'principal/img/logo.png' %}" alt="Logo" />
+      <a href="/ptmdsa/" title="Página Principal" style="pointer-events:auto"><img src="{% static 'principal/img/logo.png' %}" alt="Logo" /></a>
     </div>
 
     <div class="etiqueta">

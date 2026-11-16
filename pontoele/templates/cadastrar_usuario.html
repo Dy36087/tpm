@@ -179,7 +179,7 @@
     {% include 'partials/system_access_buttons.html' %}
     <main class="container">
       <div class="topo">
-        <img src="{% static 'principal/img/logo.png' %}" alt="Logo PTM" />
+        <a href="/ptmdsa/" title="Página Principal" style="pointer-events:auto"><img src="{% static 'principal/img/logo.png' %}" alt="Logo PTM" /></a>
         <h1>Cadastrar usuário de acesso</h1>
       </div>
       <p class="descricao">Crie uma conta para permitir o acesso ao sistema.</p>
@@ -226,7 +226,7 @@
         <p class="erro">{{ erro }}</p>
         {% endfor %}
         <div class="acoes">
-          <a class="botao voltar" href="{% url 'listar_servidores' %}"
+          <a class="botao voltar" href="{% url 'listar_servidores' %}" onclick="if (document.referrer.indexOf(location.origin) === 0) { history.back(); return false }"
             >Voltar</a
           >
           <button class="botao salvar" type="submit">Cadastrar usuário</button>
